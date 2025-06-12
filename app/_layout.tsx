@@ -11,6 +11,7 @@ import "react-native-reanimated";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Platform, StyleSheet } from "react-native";
+import { StoreProvider } from "@/contexts/StoreContext";
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
@@ -25,16 +26,18 @@ export default function RootLayout() {
 
   return (
     <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-      <SafeAreaView
-        style={styles.safeArea}
-        edges={Platform.OS === "android" ? ["top", "bottom"] : ["top"]}
-      >
-        <Stack>
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen name="+not-found" />
-        </Stack>
-        <StatusBar style="auto" />
-      </SafeAreaView>
+      <StoreProvider>
+        <SafeAreaView
+          style={styles.safeArea}
+          edges={Platform.OS === "android" ? ["top", "bottom"] : ["top"]}
+        >
+          <Stack>
+            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            <Stack.Screen name="+not-found" />
+          </Stack>
+          <StatusBar style="auto" />
+        </SafeAreaView>
+      </StoreProvider>
     </ThemeProvider>
   );
 }

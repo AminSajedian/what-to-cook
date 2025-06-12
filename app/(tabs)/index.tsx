@@ -1,7 +1,9 @@
+import { useStore } from "@/contexts/StoreContext";
 import React, { useState } from "react";
 import {
   FlatList,
   Modal,
+  RefreshControl,
   ScrollView,
   StyleSheet,
   Text,
@@ -10,29 +12,20 @@ import {
   View,
 } from "react-native";
 
-const weekDays = [
-  "Monday",
-  "Tuesday",
-  "Wednesday",
-  "Thursday",
-  "Friday",
-  "Saturday",
-  "Sunday",
-];
-const defaultFoods = [""];
-
 type PlanField = "breakfast" | "lunch" | "dinner" | "notes";
 
-// Helper for field labels
-const fieldLabels: Record<PlanField, string> = {
-  breakfast: "Breakfast",
-  lunch: "Lunch",
-  dinner: "Dinner",
-  notes: "Notes",
-};
-
 export default function HomeScreen() {
-  const [foods] = useState(defaultFoods);
+  const {
+    weekDays,
+    foodsState,
+    fieldLabels,
+    initialized, // get initialized from context
+    setWeekDays,
+    setFoods,
+    setFieldLabels,
+  } = useStore();
+
+  // Plan state, update when weekDays changes
   const [plan, setPlan] = useState(
     weekDays.map((day) => ({
       day,
@@ -42,6 +35,21 @@ export default function HomeScreen() {
       notes: "",
     }))
   );
+
+  // Update plan when weekDays changes (after async load)
+  React.useEffect(() => {
+    if (weekDays.length > 0) {
+      setPlan(
+        weekDays.map((day) => ({
+          day,
+          breakfast: "",
+          lunch: "",
+          dinner: "",
+          notes: "",
+        }))
+      );
+    }
+  }, [weekDays]);
 
   // Modal state for food selection
   const [foodSelectorVisible, setFoodSelectorVisible] = useState(false);
@@ -79,11 +87,40 @@ export default function HomeScreen() {
     setPlan(newPlan);
   };
 
+  // Add refresh state
+  const [refreshing, setRefreshing] = useState(false);
+
+  // Refresh handler: reload context state from AsyncStorage
+  const onRefresh = async () => {
+    setRefreshing(true);
+    // Manually reload from AsyncStorage and update context
+    const AsyncStorage = (
+      await import("@react-native-async-storage/async-storage")
+    ).default;
+    const [days, foods, labels] = await Promise.all([
+      AsyncStorage.getItem("weekDays"),
+      AsyncStorage.getItem("foods"),
+      AsyncStorage.getItem("fieldLabels"),
+    ]);
+    if (days) setWeekDays(JSON.parse(days));
+    if (foods) setFoods(JSON.parse(foods));
+    if (labels) setFieldLabels(JSON.parse(labels));
+    setRefreshing(false);
+  };
+
+  // Wait for context to be initialized before rendering
+  if (!initialized) {
+    return <View style={{ flex: 1, backgroundColor: "#f2f2f7" }} />;
+  }
+
   return (
     <>
       <ScrollView
         style={styles.container}
         contentContainerStyle={styles.contentContainer}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
       >
         {plan.map((item, idx) => (
           <View key={item.day} style={styles.dayCard}>
@@ -136,7 +173,7 @@ export default function HomeScreen() {
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>Select Food</Text>
             <FlatList
-              data={foods}
+              data={foodsState}
               keyExtractor={(item) => item}
               renderItem={({ item }) => (
                 <TouchableOpacity

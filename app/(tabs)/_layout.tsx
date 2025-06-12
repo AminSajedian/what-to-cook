@@ -1,12 +1,12 @@
-import { Tabs } from "expo-router";
-import React from "react";
-import { Platform } from "react-native";
-import { HapticTab } from "@/components/HapticTab";
-import { IconSymbol } from "@/components/ui/IconSymbol";
-import TabBarBackground from "@/components/ui/TabBarBackground";
-import { Colors } from "@/constants/Colors";
-import { useColorScheme } from "@/hooks/useColorScheme";
-import { StoreProvider } from "@/contexts/StoreContext";
+import { HapticTab } from '@/components/HapticTab';
+import { IconSymbol } from '@/components/ui/IconSymbol';
+import TabBarBackground from '@/components/ui/TabBarBackground';
+import { Colors } from '@/constants/Colors';
+import { StoreProvider } from '@/contexts/StoreContext';
+import { useColorScheme } from '@/hooks/useColorScheme';
+import { Tabs } from 'expo-router';
+import React from 'react';
+import { Platform } from 'react-native';
 
 export default function Layout() {
   const colorScheme = useColorScheme();
@@ -15,44 +15,37 @@ export default function Layout() {
     <StoreProvider>
       <Tabs
         screenOptions={{
-          tabBarActiveTintColor: Colors[colorScheme ?? "light"].tint,
+          tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
           headerShown: false,
           tabBarButton: HapticTab,
           tabBarBackground: TabBarBackground,
           tabBarStyle: Platform.select({
             ios: {
               // Use a transparent background on iOS to show the blur effect
-              position: "absolute",
+              position: 'absolute',
             },
             default: {},
           }),
-        }}
-      >
+        }}>
         <Tabs.Screen
           name="index"
           options={{
-            title: "Week Plan",
-            tabBarIcon: ({ color }) => (
-              <IconSymbol size={28} name="house.fill" color={color} />
-            ),
+            title: 'Week Plan',
+            tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
           }}
         />
         <Tabs.Screen
           name="food_list"
           options={{
-            title: "Food List",
-            tabBarIcon: ({ color }) => (
-              <IconSymbol size={28} name="paperplane.fill" color={color} />
-            ),
+            title: 'Food List',
+            tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
           }}
         />
         <Tabs.Screen
           name="settings"
           options={{
-            title: "Settings",
-            tabBarIcon: ({ color }) => (
-              <IconSymbol size={28} name="gearshape.fill" color={color} />
-            ),
+            title: 'Settings',
+            tabBarIcon: ({ color }) => <IconSymbol size={28} name="slider.horizontal.3" color={color} />, // changed to a more common settings icon
           }}
         />
       </Tabs>

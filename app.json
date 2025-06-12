@@ -5,7 +5,7 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "whattocook",
+    "scheme": "what-to-cook",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {

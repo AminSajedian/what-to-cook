@@ -26,18 +26,13 @@ export default function SettingsScreen() {
 
   // Local state for editing
   const [days, setDays] = useState<string[]>(weekDays);
-  const [foods, setFoodsLocal] = useState<string[]>(foodsState);
   const [labels, setLabels] = useState({ ...fieldLabels });
   const [newDay, setNewDay] = useState("");
-  const [newFood, setNewFood] = useState("");
 
   // Sync local state with context when context changes
   React.useEffect(() => {
     setDays(weekDays);
   }, [weekDays]);
-  React.useEffect(() => {
-    setFoodsLocal(foodsState);
-  }, [foodsState]);
   React.useEffect(() => {
     setLabels({ ...fieldLabels });
   }, [fieldLabels]);
@@ -117,48 +112,6 @@ export default function SettingsScreen() {
         />
       </View>
       <Button title="Save Days" onPress={() => setWeekDays(days)} />
-
-      <Text style={styles.title}>Edit Foods</Text>
-      <FlatList
-        data={foods}
-        keyExtractor={(f) => f}
-        renderItem={({ item, index }) => (
-          <View style={styles.row}>
-            <TextInput
-              style={styles.input}
-              value={item}
-              onChangeText={(v) => {
-                const arr = [...foods];
-                arr[index] = v;
-                setFoodsLocal(arr);
-              }}
-            />
-            <TouchableOpacity
-              onPress={() => setFoodsLocal(foods.filter((_, i) => i !== index))}
-            >
-              <Text style={styles.removeBtn}>✕</Text>
-            </TouchableOpacity>
-          </View>
-        )}
-      />
-      <View style={styles.row}>
-        <TextInput
-          style={styles.input}
-          value={newFood}
-          onChangeText={setNewFood}
-          placeholder="Add new food"
-        />
-        <Button
-          title="Add"
-          onPress={() => {
-            if (newFood.trim()) {
-              setFoodsLocal([...foods, newFood.trim()]);
-              setNewFood("");
-            }
-          }}
-        />
-      </View>
-      <Button title="Save Foods" onPress={() => setFoods(foods)} />
 
       <Text style={styles.title}>Edit Field Labels</Text>
       {Object.keys(labels).map((key) => {

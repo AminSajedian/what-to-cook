@@ -1,18 +1,18 @@
 import { useStore } from "@/contexts/StoreContext"; // import useStore
 import React, { useState } from "react";
 import {
-  FlatList,
   RefreshControl,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
-  View,
+  View
 } from "react-native";
+import DraggableFlatList from "react-native-draggable-flatlist";
 
 export default function FoodsScreen() {
-  const { foodsState, setFoods, initialized, setWeekDays, setFieldLabels } =
-    useStore(); // use context
+  // Inline comment: Destructure only the variables you actually use from useStore
+  const { foodsState, setFoods, initialized, setWeekDays, setFieldLabels } = useStore();
   const [newFood, setNewFood] = useState("");
 
   // Add food to context
@@ -49,6 +49,11 @@ export default function FoodsScreen() {
     setRefreshing(false);
   };
 
+  // Handler for drag-and-drop reorder
+  const onDragEnd = ({ data }: { data: string[] }) => {
+    setFoods(data); // Update context with new order
+  };
+
   // Wait for context to be initialized before rendering
   if (!initialized) {
     return <View style={{ flex: 1, backgroundColor: "#111" }} />;
@@ -57,11 +62,18 @@ export default function FoodsScreen() {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Foods List</Text>
-      <FlatList
-        data={foodsState}
+      <DraggableFlatList
+        data={foodsState.map(item => String(item))}
         keyExtractor={(item) => item}
-        renderItem={({ item }) => (
-          <View style={styles.foodRow}>
+        renderItem={({ item, drag, isActive }) => (
+          <View style={[styles.foodRow, isActive && { opacity: 0.7 }]}> 
+            <TouchableOpacity
+              onLongPress={drag}
+              delayLongPress={150}
+              style={{ marginRight: 10 }}
+            >
+              <Text style={{ fontSize: 20, color: '#888' }}>≡</Text>
+            </TouchableOpacity>
             <Text style={styles.foodItem}>{item}</Text>
             <TouchableOpacity
               onPress={() => removeFood(item)}
@@ -75,8 +87,10 @@ export default function FoodsScreen() {
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
+        onDragEnd={onDragEnd}
+        contentContainerStyle={{ paddingBottom: 80 }}
       />
-      <View style={styles.addRow}>
+      <View style={[styles.addRow, { position: 'absolute', left: 0, right: 0, bottom: 0, backgroundColor: '#111', padding: 20, paddingTop: 12 }]}> 
         <TextInput
           style={styles.input}
           value={newFood}

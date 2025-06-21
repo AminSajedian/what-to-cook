@@ -4,7 +4,6 @@ import {
   Button,
   FlatList,
   RefreshControl,
-  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -17,7 +16,6 @@ export default function SettingsScreen() {
   const {
     weekDays,
     setWeekDays,
-    foodsState,
     setFoods,
     fieldLabels,
     setFieldLabels,
@@ -65,12 +63,7 @@ export default function SettingsScreen() {
     );
 
   return (
-    <ScrollView
-      style={styles.container}
-      refreshControl={
-        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-      }
-    >
+    <View style={styles.container}>
       <Text style={styles.title}>Edit Week Days</Text>
       <FlatList
         data={days}
@@ -93,43 +86,50 @@ export default function SettingsScreen() {
             </TouchableOpacity>
           </View>
         )}
+        ListHeaderComponent={<Text style={styles.title}>Edit Week Days</Text>}
+        ListFooterComponent={
+          <>
+            <View style={styles.row}>
+              <TextInput
+                style={styles.input}
+                value={newDay}
+                onChangeText={setNewDay}
+                placeholder="Add new day"
+              />
+              <Button
+                title="Add"
+                onPress={() => {
+                  if (newDay.trim()) {
+                    setDays([...days, newDay.trim()]);
+                    setNewDay("");
+                  }
+                }}
+              />
+            </View>
+            <Button title="Save Days" onPress={() => setWeekDays(days)} />
+            <Text style={styles.title}>Edit Field Labels</Text>
+            {Object.keys(labels).map((key) => {
+              const field =
+                key as keyof typeof labels as import("@/contexts/StoreContext").PlanField;
+              return (
+                <View style={styles.row} key={key}>
+                  <Text style={styles.label}>{key}:</Text>
+                  <TextInput
+                    style={styles.input}
+                    value={labels[field]}
+                    onChangeText={(v) => setLabels({ ...labels, [field]: v })}
+                  />
+                </View>
+              );
+            })}
+            <Button title="Save Labels" onPress={() => setFieldLabels(labels)} />
+          </>
+        }
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
       />
-      <View style={styles.row}>
-        <TextInput
-          style={styles.input}
-          value={newDay}
-          onChangeText={setNewDay}
-          placeholder="Add new day"
-        />
-        <Button
-          title="Add"
-          onPress={() => {
-            if (newDay.trim()) {
-              setDays([...days, newDay.trim()]);
-              setNewDay("");
-            }
-          }}
-        />
-      </View>
-      <Button title="Save Days" onPress={() => setWeekDays(days)} />
-
-      <Text style={styles.title}>Edit Field Labels</Text>
-      {Object.keys(labels).map((key) => {
-        const field =
-          key as keyof typeof labels as import("@/contexts/StoreContext").PlanField;
-        return (
-          <View style={styles.row} key={key}>
-            <Text style={styles.label}>{key}:</Text>
-            <TextInput
-              style={styles.input}
-              value={labels[field]}
-              onChangeText={(v) => setLabels({ ...labels, [field]: v })}
-            />
-          </View>
-        );
-      })}
-      <Button title="Save Labels" onPress={() => setFieldLabels(labels)} />
-    </ScrollView>
+    </View>
   );
 }
 

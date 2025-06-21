@@ -1,4 +1,4 @@
-import { useStore } from "@/contexts/StoreContext"; // import useStore
+import { useStore } from "@/contexts/StoreContext";
 import React, { useState } from "react";
 import {
   RefreshControl,
@@ -6,12 +6,13 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  View
+  View,
+  useColorScheme, // Add useColorScheme for theme
 } from "react-native";
 import DraggableFlatList from "react-native-draggable-flatlist";
 
 export default function FoodsScreen() {
-  // Inline comment: Destructure only the variables you actually use from useStore
+  const colorScheme = useColorScheme(); // Get current theme
   const { foodsState, setFoods, initialized, setWeekDays, setFieldLabels } = useStore();
   const [newFood, setNewFood] = useState("");
 
@@ -59,25 +60,36 @@ export default function FoodsScreen() {
     return <View style={{ flex: 1, backgroundColor: "#111" }} />;
   }
 
+  // Theme-aware colors
+  const backgroundColor = colorScheme === "dark" ? "#111" : "#f2f2f7";
+  const cardBg = colorScheme === "dark" ? "#18181b" : "#fff";
+  const cardBorder = colorScheme === "dark" ? "#23232a" : "#e5e5ea";
+  const textColor = colorScheme === "dark" ? "#fafafa" : "#222";
+  const inputBg = colorScheme === "dark" ? "#23232a" : "#fff";
+  const inputBorder = colorScheme === "dark" ? "#333" : "#e0e0e0";
+
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Foods List</Text>
+    <View style={[styles.container, { backgroundColor }]}> {/* Theme background */}
       <DraggableFlatList
         data={foodsState.map(item => String(item))}
         keyExtractor={(item) => item}
         renderItem={({ item, drag, isActive }) => (
-          <View style={[styles.foodRow, isActive && { opacity: 0.7 }]}> 
+          <View style={[
+            styles.foodRow,
+            { backgroundColor: cardBg, borderColor: cardBorder, shadowColor: colorScheme === "dark" ? "#000" : "#000" },
+            isActive && { opacity: 0.7 },
+          ]}>
             <TouchableOpacity
               onLongPress={drag}
               delayLongPress={150}
               style={{ marginRight: 10 }}
             >
-              <Text style={{ fontSize: 20, color: '#888' }}>≡</Text>
+              <Text style={{ fontSize: 20, color: colorScheme === "dark" ? '#aaa' : '#888' }}>≡</Text>
             </TouchableOpacity>
-            <Text style={styles.foodItem}>{item}</Text>
+            <Text style={[styles.foodItem, { color: textColor }]}>{item}</Text>
             <TouchableOpacity
               onPress={() => removeFood(item)}
-              style={styles.removeBtn}
+              style={[styles.removeBtn, { backgroundColor: '#ff5252' }]}
             >
               <Text style={styles.removeBtnText}>✕</Text>
             </TouchableOpacity>
@@ -90,16 +102,39 @@ export default function FoodsScreen() {
         onDragEnd={onDragEnd}
         contentContainerStyle={{ paddingBottom: 80 }}
       />
-      <View style={[styles.addRow, { position: 'absolute', left: 0, right: 0, bottom: 0, backgroundColor: '#111', padding: 20, paddingTop: 12 }]}> 
+      <View style={[
+        styles.addRow,
+        {
+          position: 'absolute',
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor,
+          padding: 20,
+          paddingTop: 12,
+          borderTopWidth: 1,
+          borderTopColor: cardBorder,
+        },
+      ]}>
         <TextInput
-          style={styles.input}
+          style={[
+            styles.input,
+            { backgroundColor: inputBg, borderColor: inputBorder, color: textColor },
+          ]}
           value={newFood}
           onChangeText={setNewFood}
           placeholder="Add new food"
-          placeholderTextColor="#aaa"
+          placeholderTextColor={colorScheme === "dark" ? "#888" : "#aaa"}
         />
-        <TouchableOpacity onPress={addFood} style={styles.addBtn}>
-          <Text style={styles.addBtnText}>Add</Text>
+        {/* Inline: Add theme-aware background color to the Add button */}
+        <TouchableOpacity
+          onPress={addFood}
+          style={[
+            styles.addBtn,
+            { backgroundColor: colorScheme === 'dark' ? '#007AFF' : '#007AFF' }, // Use a strong blue for both themes
+          ]}
+        >
+          <Text style={[styles.addBtnText, { color: '#fff' }]}>Add</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -107,18 +142,16 @@ export default function FoodsScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#111", padding: 20 },
+  container: { flex: 1, padding: 20 },
   title: {
     fontSize: 22,
     fontWeight: "bold",
     marginBottom: 18,
-    color: "#fafafa",
   },
   list: { marginBottom: 16 },
   foodRow: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#fafafa",
     borderRadius: 10,
     paddingVertical: 10,
     paddingHorizontal: 16,
@@ -126,10 +159,9 @@ const styles = StyleSheet.create({
     elevation: 1,
     minHeight: 48,
   },
-  foodItem: { fontSize: 17, color: "#222", flex: 1 },
+  foodItem: { fontSize: 17, flex: 1 },
   removeBtn: {
     marginLeft: 12,
-    backgroundColor: "#ff5252",
     borderRadius: 16,
     padding: 0,
     alignItems: "center",
@@ -139,7 +171,6 @@ const styles = StyleSheet.create({
     display: "flex",
   },
   removeBtnText: {
-    color: "#fff",
     fontSize: 18,
     fontWeight: "bold",
     textAlign: "center",
@@ -149,19 +180,16 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     borderWidth: 1,
-    borderColor: "#e0e0e0",
     borderRadius: 8,
     padding: 10,
-    backgroundColor: "#fff",
     fontSize: 15,
     color: "#222",
   },
   addBtn: {
     marginLeft: 10,
-    backgroundColor: "#007AFF",
     borderRadius: 8,
     paddingVertical: 10,
     paddingHorizontal: 18,
   },
-  addBtnText: { color: "#fff", fontWeight: "bold", fontSize: 16 },
+  addBtnText: { fontWeight: "bold", fontSize: 16 },
 });

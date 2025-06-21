@@ -10,11 +10,13 @@ import {
   TextInput,
   TouchableOpacity,
   View,
+  useColorScheme, // Add useColorScheme
 } from "react-native";
 
 type PlanField = "breakfast" | "lunch" | "dinner" | "notes";
 
 export default function HomeScreen() {
+  const colorScheme = useColorScheme();
   const {
     weekDays,
     foodsState,
@@ -108,32 +110,53 @@ export default function HomeScreen() {
     setRefreshing(false);
   };
 
+  // Theme-aware colors
+  const backgroundColor = colorScheme === "dark" ? "#111" : "#f2f2f7";
+  const textColor = colorScheme === "dark" ? "#fafafa" : "#222";
+  const cardBg = colorScheme === "dark" ? "#18181b" : "#fff";
+  const cardBorder = colorScheme === "dark" ? "#23232a" : "#e5e5ea";
+  const labelColor = colorScheme === "dark" ? "#bdbdbd" : "#444";
+  const inputBg = colorScheme === "dark" ? "#23232a" : "#f7faff";
+  const inputBorder = colorScheme === "dark" ? "#333" : "#d1d1d6";
+  const selectedBg = colorScheme === "dark" ? "#232f3e" : "#e6f0fa";
+  const selectedText = colorScheme === "dark" ? "#7cc4fa" : "#007AFF";
+
   // Wait for context to be initialized before rendering
   if (!initialized) {
-    return <View style={{ flex: 1, backgroundColor: "#f2f2f7" }} />;
+    // Inline fix: ensure only React elements are returned, not raw values
+    return (
+      <View style={{ flex: 1, backgroundColor }}>
+        <Text style={{ color: textColor, textAlign: 'center', marginTop: 40 }}>Loading...</Text>
+      </View>
+    );
   }
 
   return (
-    <>
+    <View style={[styles.container, { backgroundColor }]}> {/* Theme background */}
       <ScrollView
-        style={styles.container}
+        style={{ flex: 1 }}
         contentContainerStyle={styles.contentContainer}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
       >
         {plan.map((item, idx) => (
-          <View key={item.day} style={styles.dayCard}>
-            <Text style={styles.dayTitle}>{item.day}</Text>
-            {/* Render each meal field as a touchable to open modal */}
+          <View
+            key={item.day}
+            style={[
+              styles.dayCard,
+              { backgroundColor: cardBg, borderColor: cardBorder, shadowColor: colorScheme === "dark" ? "#000" : "#000" },
+            ]}
+          >
+            <Text style={[styles.dayTitle, { color: textColor, opacity: 0.93 }]}>{item.day}</Text>
             {(["breakfast", "lunch", "dinner"] as PlanField[]).map((field) => (
               <View style={styles.row} key={field}>
-                <Text style={styles.label}>{fieldLabels[field]}:</Text>
+                <Text style={[styles.label, { color: labelColor }]}>{fieldLabels[field]}:</Text>
                 <TouchableOpacity
                   style={[
                     styles.foodSelectorField,
-                    // Highlight if a food is selected
-                    item[field] ? styles.foodSelectorFieldSelected : undefined,
+                    { backgroundColor: inputBg, borderColor: inputBorder },
+                    item[field] && { backgroundColor: selectedBg, borderColor: selectedText },
                   ]}
                   onPress={() => openFoodSelector(idx, field)}
                   activeOpacity={0.7}
@@ -141,8 +164,8 @@ export default function HomeScreen() {
                   <Text
                     style={[
                       styles.foodSelectorText,
-                      // Highlight text if a food is selected
-                      item[field] ? styles.foodSelectorTextSelected : undefined,
+                      { color: textColor },
+                      item[field] && { color: selectedText, fontWeight: "bold" },
                     ]}
                   >
                     {item[field] ? item[field] : `Select food`}
@@ -151,13 +174,16 @@ export default function HomeScreen() {
               </View>
             ))}
             <TextInput
-              style={styles.notes}
+              style={[
+                styles.notes,
+                { backgroundColor: inputBg, borderColor: inputBorder, color: textColor },
+              ]}
               value={item.notes}
               onChangeText={(v) => updatePlan(idx, "notes", v)}
               placeholder="Add notes..."
               multiline
-              placeholderTextColor="#aaa"
-              selectionColor="#007AFF"
+              placeholderTextColor={colorScheme === "dark" ? "#888" : "#aaa"}
+              selectionColor={selectedText}
             />
           </View>
         ))}
@@ -169,18 +195,21 @@ export default function HomeScreen() {
         transparent={true}
         onRequestClose={() => setFoodSelectorVisible(false)}
       >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Select Food</Text>
+        <View style={[styles.modalOverlay, { backgroundColor: colorScheme === 'dark' ? 'rgba(0,0,0,0.7)' : 'rgba(0,0,0,0.18)' }]}> {/* Darker overlay in dark mode */}
+          <View style={[styles.modalContent, { backgroundColor: cardBg }]}> {/* Modal card uses theme */}
+            <Text style={[styles.modalTitle, { color: textColor }]}>Select Food</Text>
             <FlatList
-              data={foodsState}
-              keyExtractor={(item) => item}
+              data={foodsState.map(item => String(item))}
+              keyExtractor={(item) => String(item)}
               renderItem={({ item }) => (
                 <TouchableOpacity
-                  style={styles.foodSelectorItem}
+                  style={[
+                    styles.foodSelectorItem,
+                    { backgroundColor: inputBg, borderColor: inputBorder },
+                  ]}
                   onPress={() => selectFood(item)}
                 >
-                  <Text style={styles.foodSelectorItemText}>{item}</Text>
+                  <Text style={[styles.foodSelectorItemText, { color: textColor }]}>{String(item)}</Text>
                 </TouchableOpacity>
               )}
               ItemSeparatorComponent={() => (
@@ -188,15 +217,18 @@ export default function HomeScreen() {
               )}
             />
             <TouchableOpacity
-              style={styles.modalCancel}
+              style={[
+                styles.modalCancel,
+                { backgroundColor: colorScheme === 'dark' ? '#23232a' : '#f2f2f7', borderColor: cardBorder },
+              ]}
               onPress={() => setFoodSelectorVisible(false)}
             >
-              <Text style={styles.modalCancelText}>Cancel</Text>
+              <Text style={[styles.modalCancelText, { color: selectedText }]}>Cancel</Text>
             </TouchableOpacity>
           </View>
         </View>
       </Modal>
-    </>
+    </View>
   );
 }
 

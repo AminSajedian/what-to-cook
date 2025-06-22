@@ -1,95 +1,74 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import React, { createContext, useContext, useEffect, useState } from "react";
+import type { StoreContextType } from "@/types/index";
 
-export type PlanField = "breakfast" | "lunch" | "dinner" | "notes";
-
-type StoreContextType = {
-  weekDays: string[];
-  setWeekDays: (days: string[]) => void;
-  foodsState: string[];
-  setFoods: (foods: string[]) => void;
-  fieldLabels: Record<PlanField, string>;
-  setFieldLabels: (labels: Record<PlanField, string>) => void;
-  initialized: boolean;
-};
-
-const defaultFieldLabels: Record<PlanField, string> = {
-  breakfast: "Breakfast",
-  lunch: "Lunch",
-  dinner: "Dinner",
-  notes: "Notes",
-};
+const defaultWeekDays = [
+  "Monday",
+  "Tuesday",
+  "Wednesday",
+  "Thursday",
+  "Friday",
+  "Saturday",
+  "Sunday",
+];
+const defaultFoods = ["Eggs", "Pasta", "Salad", "Chicken", "Soup", "Rice", "Fish"];
+const defaultMeals = ["Breakfast", "Lunch", "Dinner"];
 
 const StoreContext = createContext<StoreContextType | undefined>(undefined);
 
-export function StoreProvider({ children }: { children: React.ReactNode }) {
-  const [weekDays, setWeekDaysState] = useState<string[]>([]);
-  const [foodsState, setFoodsState] = useState<string[]>([]);
-  const [fieldLabels, setFieldLabelsState] =
-    useState<Record<PlanField, string>>(defaultFieldLabels);
-  const [initialized, setInitialized] = useState(false);
+export const StoreProvider = ({ children }: { children: React.ReactNode }) => {
+  const [weekDays, setWeekDaysState] = useState<string[]>(defaultWeekDays);
+  const [foods, setFoodsState] = useState<string[]>(defaultFoods);
+  const [meals, setMealsState] = useState<string[]>(defaultMeals);
+  const [isInitialized, setIsInitialized] = useState<boolean>(false);
 
-  // Load from AsyncStorage on mount
+  // Persist functions
+  const updateWeekDays = (newDays: string[]) => {
+    setWeekDaysState(newDays);
+    AsyncStorage.setItem("weekDays", JSON.stringify(newDays));
+  };
+  const updateFoods = (newFoods: string[]) => {
+    setFoodsState(newFoods);
+    AsyncStorage.setItem("foods", JSON.stringify(newFoods));
+  };
+  const updateMeals = (newMeals: string[]) => {
+    setMealsState(newMeals);
+    AsyncStorage.setItem("meals", JSON.stringify(newMeals));
+  };
+
+  // Load from AsyncStorage or use defaults
   useEffect(() => {
     (async () => {
-      const [days, foods, labels] = await Promise.all([
+      const AsyncStorage = (await import("@react-native-async-storage/async-storage"))
+        .default;
+      const [weekDaysData, foodsData, mealsData] = await Promise.all([
         AsyncStorage.getItem("weekDays"),
-        AsyncStorage.getItem("foods"), // changed from "defaultFoods" to "foods"
-        AsyncStorage.getItem("fieldLabels"),
+        AsyncStorage.getItem("foods"),
+        AsyncStorage.getItem("meals"),
       ]);
-      setWeekDaysState(
-        days
-          ? JSON.parse(days)
-          : [
-              "Monday",
-              "Tuesday",
-              "Wednesday",
-              "Thursday",
-              "Friday",
-              "Saturday",
-              "Sunday",
-            ]
-      );
-      setFoodsState(
-        foods
-          ? JSON.parse(foods)
-          : ["Eggs", "Pasta", "Salad", "Chicken", "Soup", "Rice", "Fish"]
-      );
-      setFieldLabelsState(labels ? JSON.parse(labels) : defaultFieldLabels);
-      setInitialized(true);
+      setWeekDaysState(weekDaysData ? JSON.parse(weekDaysData) : defaultWeekDays);
+      setFoodsState(foodsData ? JSON.parse(foodsData) : defaultFoods);
+      setMealsState(mealsData ? JSON.parse(mealsData) : defaultMeals);
+      setIsInitialized(true);
     })();
   }, []);
-
-  // Save to AsyncStorage when changed
-  const setWeekDays = (days: string[]) => {
-    setWeekDaysState(days);
-    AsyncStorage.setItem("weekDays", JSON.stringify(days));
-  };
-  const setFoods = (foods: string[]) => {
-    setFoodsState(foods);
-    AsyncStorage.setItem("foods", JSON.stringify(foods)); // changed from "defaultFoods" to "foods"
-  };
-  const setFieldLabels = (labels: Record<PlanField, string>) => {
-    setFieldLabelsState(labels);
-    AsyncStorage.setItem("fieldLabels", JSON.stringify(labels));
-  };
 
   return (
     <StoreContext.Provider
       value={{
         weekDays,
-        setWeekDays,
-        foodsState,
-        setFoods,
-        fieldLabels,
-        setFieldLabels,
-        initialized,
+        updateWeekDays,
+        foods,
+        updateFoods,
+        meals,
+        updateMeals,
+        isInitialized,
       }}
     >
       {children}
     </StoreContext.Provider>
   );
-}
+};
 
 export function useStore() {
   const ctx = useContext(StoreContext);

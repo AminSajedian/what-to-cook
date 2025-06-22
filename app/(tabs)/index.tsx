@@ -1,4 +1,5 @@
 import { useStore } from "@/contexts/StoreContext";
+import type { DayPlan } from "@/types/index"; // Import DayPlan
 import React, { useState } from "react";
 import {
   FlatList,
@@ -13,45 +14,47 @@ import {
   useColorScheme, // Add useColorScheme
 } from "react-native";
 
-type PlanField = "breakfast" | "lunch" | "dinner" | "notes";
+type PlanField = "notes" | string; // Allow dynamic meal fields
 
 export default function HomeScreen() {
   const colorScheme = useColorScheme();
   const {
     weekDays,
-    foodsState,
-    fieldLabels,
-    initialized, // get initialized from context
-    setWeekDays,
-    setFoods,
-    setFieldLabels,
+    updateWeekDays,
+    foods,
+    updateFoods,
+    meals,
+    updateMeals,
+    isInitialized,
   } = useStore();
 
-  // Plan state, update when weekDays changes
-  const [plan, setPlan] = useState(
-    weekDays.map((day) => ({
-      day,
-      breakfast: "",
-      lunch: "",
-      dinner: "",
-      notes: "",
-    }))
+  // Plan state, update when weekDays or meals changes
+  const [plan, setPlan] = useState<DayPlan[]>(
+    weekDays.map((day) => {
+      const mealFields = Object.fromEntries(meals.map((m) => [m, ""]));
+      return {
+        day,
+        ...mealFields,
+        notes: "",
+      };
+    })
   );
 
-  // Update plan when weekDays changes (after async load)
+  // Update plan when weekDays or meals changes
   React.useEffect(() => {
-    if (weekDays.length > 0) {
+    if (weekDays.length > 0 && meals.length > 0) {
       setPlan(
-        weekDays.map((day) => ({
-          day,
-          breakfast: "",
-          lunch: "",
-          dinner: "",
-          notes: "",
-        }))
+        weekDays.map((day) => {
+          const mealFields = Object.fromEntries(meals.map((m) => [m, ""]));
+          return {
+            day,
+            ...mealFields,
+            notes: "",
+          };
+        })
       );
     }
-  }, [weekDays]);
+  }, [weekDays, meals]);
 
   // Modal state for food selection
   const [foodSelectorVisible, setFoodSelectorVisible] = useState(false);
@@ -64,6 +67,7 @@ export default function HomeScreen() {
 
   // Open modal for a specific field
   const openFoodSelector = (dayIdx: number, field: PlanField) => {
+    if (field === "notes") return;
     setFoodSelectorDayIdx(dayIdx);
     setFoodSelectorField(field);
     setFoodSelectorVisible(true);
@@ -95,18 +99,17 @@ export default function HomeScreen() {
   // Refresh handler: reload context state from AsyncStorage
   const onRefresh = async () => {
     setRefreshing(true);
-    // Manually reload from AsyncStorage and update context
     const AsyncStorage = (
       await import("@react-native-async-storage/async-storage")
     ).default;
-    const [days, foods, labels] = await Promise.all([
+    const [days, foodsData, mealsData] = await Promise.all([
       AsyncStorage.getItem("weekDays"),
       AsyncStorage.getItem("foods"),
-      AsyncStorage.getItem("fieldLabels"),
+      AsyncStorage.getItem("meals"),
     ]);
-    if (days) setWeekDays(JSON.parse(days));
-    if (foods) setFoods(JSON.parse(foods));
-    if (labels) setFieldLabels(JSON.parse(labels));
+    if (days) updateWeekDays(JSON.parse(days));
+    if (foodsData) updateFoods(JSON.parse(foodsData));
+    if (mealsData) updateMeals(JSON.parse(mealsData));
     setRefreshing(false);
   };
 
@@ -122,7 +125,7 @@ export default function HomeScreen() {
   const selectedText = colorScheme === "dark" ? "#7cc4fa" : "#007AFF";
 
   // Wait for context to be initialized before rendering
-  if (!initialized) {
+  if (!isInitialized) {
     // Inline fix: ensure only React elements are returned, not raw values
     return (
       <View style={{ flex: 1, backgroundColor }}>
@@ -149,9 +152,10 @@ export default function HomeScreen() {
             ]}
           >
             <Text style={[styles.dayTitle, { color: textColor, opacity: 0.93 }]}>{item.day}</Text>
-            {(["breakfast", "lunch", "dinner"] as PlanField[]).map((field) => (
+            {/* Render meal fields dynamically */}
+            {meals.map((field) => (
               <View style={styles.row} key={field}>
-                <Text style={[styles.label, { color: labelColor }]}>{fieldLabels[field]}:</Text>
+                <Text style={[styles.label, { color: labelColor }]}>{field}:</Text>
                 <TouchableOpacity
                   style={[
                     styles.foodSelectorField,
@@ -188,6 +192,7 @@ export default function HomeScreen() {
           </View>
         ))}
       </ScrollView>
+      
       {/* Modal for food selection */}
       <Modal
         visible={foodSelectorVisible}
@@ -199,7 +204,7 @@ export default function HomeScreen() {
           <View style={[styles.modalContent, { backgroundColor: cardBg }]}> {/* Modal card uses theme */}
             <Text style={[styles.modalTitle, { color: textColor }]}>Select Food</Text>
             <FlatList
-              data={foodsState.map(item => String(item))}
+              data={foods.map(item => String(item))}
               keyExtractor={(item) => String(item)}
               renderItem={({ item }) => (
                 <TouchableOpacity

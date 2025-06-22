@@ -14,21 +14,21 @@ import DraggableFlatList from "react-native-draggable-flatlist";
 
 export default function FoodsScreen() {
   const colorScheme = useColorScheme(); // Get current theme
-  const { foodsState, setFoods, initialized, setWeekDays, setFieldLabels } = useStore();
+  const { foods, updateFoods, isInitialized, updateWeekDays, updateMeals } = useStore();
   const [newFood, setNewFood] = useState("");
 
   // Add food to context
   const addFood = () => {
     const trimmed = newFood.trim();
-    if (trimmed && !foodsState.includes(trimmed)) {
-      setFoods([...foodsState, trimmed]);
+    if (trimmed && !foods.includes(trimmed)) {
+      updateFoods([...foods, trimmed]);
       setNewFood("");
     }
   };
 
   // Remove food from context
   const removeFood = (food: string) => {
-    setFoods(foodsState.filter((f) => f !== food));
+    updateFoods(foods.filter((f) => f !== food));
   };
 
   // Add refresh state
@@ -40,24 +40,24 @@ export default function FoodsScreen() {
     const AsyncStorage = (
       await import("@react-native-async-storage/async-storage")
     ).default;
-    const [days, foods, labels] = await Promise.all([
+    const [days, foodsData, mealsData] = await Promise.all([
       AsyncStorage.getItem("weekDays"),
       AsyncStorage.getItem("foods"),
-      AsyncStorage.getItem("fieldLabels"),
+      AsyncStorage.getItem("meals"),
     ]);
-    if (days) setWeekDays(JSON.parse(days));
-    if (foods) setFoods(JSON.parse(foods));
-    if (labels) setFieldLabels(JSON.parse(labels));
+    if (days) updateWeekDays(JSON.parse(days));
+    if (foodsData) updateFoods(JSON.parse(foodsData));
+    if (mealsData) updateMeals(JSON.parse(mealsData));
     setRefreshing(false);
   };
 
   // Handler for drag-and-drop reorder
   const onDragEnd = ({ data }: { data: string[] }) => {
-    setFoods(data); // Update context with new order
+    updateFoods(data); // Update context with new order
   };
 
   // Wait for context to be initialized before rendering
-  if (!initialized) {
+  if (!isInitialized) {
     return <View style={{ flex: 1, backgroundColor: "#111" }} />;
   }
 
@@ -72,7 +72,7 @@ export default function FoodsScreen() {
   return (
     <View style={[styles.container, { backgroundColor }]}> {/* Theme background */}
       <DraggableFlatList
-        data={foodsState.map(item => String(item))}
+        data={foods.map(item => String(item))}
         keyExtractor={(item) => item}
         renderItem={({ item, drag, isActive }) => (
           <View style={[

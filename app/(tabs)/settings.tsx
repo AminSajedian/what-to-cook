@@ -137,6 +137,7 @@ export default function SettingsScreen() {
             >
               <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 17, textAlign: 'center' }}>SAVE DAYS</Text>
             </TouchableOpacity>
+            
             <Text style={[styles.title, { color: textColor, marginBottom: 8 }]}>Edit Field Labels</Text>
             {Object.keys(labels).map((key) => {
               const field = key as keyof typeof labels as import("@/contexts/StoreContext").PlanField;

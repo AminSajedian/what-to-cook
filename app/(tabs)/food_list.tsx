@@ -1,4 +1,5 @@
 import { useStore } from "@/contexts/StoreContext";
+import { MaterialIcons } from '@expo/vector-icons'; // Add this import for trash icon
 import React, { useState } from "react";
 import {
   RefreshControl,
@@ -91,7 +92,8 @@ export default function FoodsScreen() {
               onPress={() => removeFood(item)}
               style={[styles.removeBtn, { backgroundColor: '#ff5252' }]}
             >
-              <Text style={styles.removeBtnText}>✕</Text>
+              {/* Use MaterialIcons trash icon instead of ✕ */}
+              <MaterialIcons name="delete" size={22} color="#fff" />
             </TouchableOpacity>
           </View>
         )}

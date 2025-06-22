@@ -16,19 +16,26 @@ export default function FoodsScreen() {
   const colorScheme = useColorScheme(); // Get current theme
   const { foods, updateFoods, isInitialized, updateWeekDays, updateMeals } = useStore();
   const [newFood, setNewFood] = useState("");
+  // Local state for editing food items
+  const [foodsList, setFoodsList] = useState<string[]>(foods);
 
-  // Add food to context
+  // Sync local state with context when context changes
+  React.useEffect(() => {
+    setFoodsList(foods);
+  }, [foods]);
+
+  // Add food to local state
   const addFood = () => {
     const trimmed = newFood.trim();
-    if (trimmed && !foods.includes(trimmed)) {
-      updateFoods([...foods, trimmed]);
+    if (trimmed && !foodsList.includes(trimmed)) {
+      setFoodsList([...foodsList, trimmed]);
       setNewFood("");
     }
   };
 
-  // Remove food from context
-  const removeFood = (food: string) => {
-    updateFoods(foods.filter((f) => f !== food));
+  // Remove food from local state
+  const removeFood = (idx: number) => {
+    setFoodsList(foodsList.filter((_, i) => i !== idx));
   };
 
   // Add refresh state
@@ -53,7 +60,12 @@ export default function FoodsScreen() {
 
   // Handler for drag-and-drop reorder
   const onDragEnd = ({ data }: { data: string[] }) => {
-    updateFoods(data); // Update context with new order
+    setFoodsList(data);
+  };
+
+  // Save foods to context
+  const saveFoods = () => {
+    updateFoods(foodsList);
   };
 
   // Wait for context to be initialized before rendering
@@ -71,46 +83,54 @@ export default function FoodsScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor }]}> {/* Theme background */}
+      <Text style={[styles.title, { color: textColor, marginBottom: 8 }]}>Edit Foods</Text>
       <DraggableFlatList
-        data={foods.map(item => String(item))}
+        data={foodsList}
         keyExtractor={(item) => item}
-        renderItem={({ item, drag, isActive }) => (
-          <View style={[
-            styles.foodRow,
-            { backgroundColor: cardBg, borderColor: cardBorder, shadowColor: colorScheme === "dark" ? "#000" : "#000" },
-            isActive && { opacity: 0.7 },
-          ]}>
-            <TouchableOpacity
-              onLongPress={drag}
-              delayLongPress={150}
-              style={{ marginRight: 10 }}
-            >
-              <Text style={{ fontSize: 20, color: colorScheme === "dark" ? '#aaa' : '#888' }}>≡</Text>
-            </TouchableOpacity>
-            <Text style={[styles.foodItem, { color: textColor }]}>{item}</Text>
-            <TouchableOpacity
-              onPress={() => removeFood(item)}
-              style={[styles.removeBtn, { backgroundColor: '#ff5252' }]}
-            >
-              {/* Use MaterialIcons trash icon instead of ✕ */}
-              <MaterialIcons name="delete" size={22} color="#fff" />
-            </TouchableOpacity>
-          </View>
-        )}
+        onDragEnd={onDragEnd}
+        renderItem={({ item, drag, isActive }) => {
+          const index = foodsList.indexOf(item);
+          return (
+            <View style={[
+              styles.foodRow,
+              { backgroundColor: cardBg, borderColor: cardBorder, shadowColor: colorScheme === "dark" ? "#000" : "#000" },
+              isActive && { opacity: 0.7 },
+            ]}>
+              <TouchableOpacity
+                onLongPress={drag}
+                delayLongPress={150}
+                style={{ marginRight: 10 }}
+              >
+                <Text style={{ fontSize: 20, color: colorScheme === "dark" ? '#aaa' : '#888' }}>≡</Text>
+              </TouchableOpacity>
+              <TextInput
+                style={[styles.foodItem, { color: textColor, backgroundColor: 'transparent', borderColor: 'transparent', fontSize: 17 }]}
+                value={item}
+                onChangeText={(v) => {
+                  const arr = [...foodsList];
+                  arr[index] = v;
+                  setFoodsList(arr);
+                }}
+                placeholderTextColor={colorScheme === "dark" ? "#888" : "#aaa"}
+              />
+              <TouchableOpacity
+                onPress={() => removeFood(index)}
+                style={[styles.removeBtn, { backgroundColor: '#ff5252' }]}
+              >
+                <MaterialIcons name="delete" size={22} color="#fff" />
+              </TouchableOpacity>
+            </View>
+          );
+        }}
         style={styles.list}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
-        onDragEnd={onDragEnd}
         contentContainerStyle={{ paddingBottom: 80 }}
       />
       <View style={[
         styles.addRow,
         {
-          position: 'absolute',
-          left: 0,
-          right: 0,
-          bottom: 0,
           backgroundColor,
           padding: 20,
           paddingTop: 12,
@@ -128,17 +148,22 @@ export default function FoodsScreen() {
           placeholder="Add new food"
           placeholderTextColor={colorScheme === "dark" ? "#888" : "#aaa"}
         />
-        {/* Inline: Add theme-aware background color to the Add button */}
         <TouchableOpacity
           onPress={addFood}
           style={[
             styles.addBtn,
-            { backgroundColor: colorScheme === 'dark' ? '#007AFF' : '#007AFF' }, // Use a strong blue for both themes
+            { backgroundColor: colorScheme === 'dark' ? '#007AFF' : '#007AFF' },
           ]}
         >
           <Text style={[styles.addBtnText, { color: '#fff' }]}>Add</Text>
         </TouchableOpacity>
       </View>
+      <TouchableOpacity
+        style={{ backgroundColor: '#007AFF', borderRadius: 8, paddingVertical: 14, marginTop: 18, marginBottom: 18 }}
+        onPress={saveFoods}
+      >
+        <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 17, textAlign: 'center' }}>SAVE FOODS</Text>
+      </TouchableOpacity>
     </View>
   );
 }

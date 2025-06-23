@@ -14,4 +14,7 @@ export interface StoreContextType {
   meals: string[];
   updateMeals: (meals: string[]) => void;
   isInitialized: boolean;
+  // Add plan and updatePlan for week plan persistence
+  plan?: DayPlan[];
+  updatePlan?: (plan: DayPlan[]) => void;
 }

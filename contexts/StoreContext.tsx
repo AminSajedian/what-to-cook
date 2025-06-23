@@ -1,6 +1,6 @@
+import type { DayPlan, StoreContextType } from "@/types/index";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import React, { createContext, useContext, useEffect, useState } from "react";
-import type { StoreContextType } from "@/types/index";
+import React, { createContext, useContext, useEffect, useState, ReactNode } from "react";
 
 const defaultWeekDays = [
   "Monday",
@@ -14,12 +14,27 @@ const defaultWeekDays = [
 const defaultFoods = ["Eggs", "Pasta", "Salad", "Chicken", "Soup", "Rice", "Fish"];
 const defaultMeals = ["Breakfast", "Lunch", "Dinner"];
 
-const StoreContext = createContext<StoreContextType | undefined>(undefined);
+// Add defaultPlan generator
+const getDefaultPlan = (weekDays: string[], meals: string[]): DayPlan[] =>
+  weekDays.map((day) => ({
+    day,
+    ...Object.fromEntries(meals.map((m) => [m, ""])),
+    notes: "",
+  }));
 
-export const StoreProvider = ({ children }: { children: React.ReactNode }) => {
+// Extend StoreContextType to include plan and updatePlan
+type StoreContextTypeExtended = StoreContextType & {
+  plan: DayPlan[];
+  updatePlan: (plan: DayPlan[]) => void;
+};
+
+const StoreContext = createContext<StoreContextTypeExtended | undefined>(undefined);
+
+export const StoreProvider = ({ children }: { children: ReactNode }) => {
   const [weekDays, setWeekDaysState] = useState<string[]>(defaultWeekDays);
   const [foods, setFoodsState] = useState<string[]>(defaultFoods);
   const [meals, setMealsState] = useState<string[]>(defaultMeals);
+  const [plan, setPlanState] = useState<DayPlan[]>(getDefaultPlan(defaultWeekDays, defaultMeals));
   const [isInitialized, setIsInitialized] = useState<boolean>(false);
 
   // Persist functions
@@ -28,6 +43,7 @@ export const StoreProvider = ({ children }: { children: React.ReactNode }) => {
     AsyncStorage.setItem("weekDays", JSON.stringify(newDays));
   };
   const updateFoods = (newFoods: string[]) => {
+    console.log("🚀 ~ updateFoods ~ newFoods:", newFoods)
     setFoodsState(newFoods);
     AsyncStorage.setItem("foods", JSON.stringify(newFoods));
   };
@@ -35,23 +51,59 @@ export const StoreProvider = ({ children }: { children: React.ReactNode }) => {
     setMealsState(newMeals);
     AsyncStorage.setItem("meals", JSON.stringify(newMeals));
   };
+  // Add updatePlan
+  const updatePlan = (newPlan: DayPlan[]) => {
+    console.log("🚀 ~ updatePlan ~ newPlan:", newPlan)
+    setPlanState(newPlan);
+    AsyncStorage.setItem("plan", JSON.stringify(newPlan));
+  };
 
   // Load from AsyncStorage or use defaults
   useEffect(() => {
     (async () => {
-      const AsyncStorage = (await import("@react-native-async-storage/async-storage"))
-        .default;
-      const [weekDaysData, foodsData, mealsData] = await Promise.all([
+      // const AsyncStorage = (await import("@react-native-async-storage/async-storage"))
+      //   .default;
+      const [weekDaysData, foodsData, mealsData, planData] = await Promise.all([
         AsyncStorage.getItem("weekDays"),
         AsyncStorage.getItem("foods"),
         AsyncStorage.getItem("meals"),
+        AsyncStorage.getItem("plan"),
       ]);
-      setWeekDaysState(weekDaysData ? JSON.parse(weekDaysData) : defaultWeekDays);
+      console.log("🚀 ~ StoreContext ~ foodsData:", foodsData)
+      const loadedWeekDays = weekDaysData ? JSON.parse(weekDaysData) : defaultWeekDays;
+      const loadedMeals = mealsData ? JSON.parse(mealsData) : defaultMeals;
+      setWeekDaysState(loadedWeekDays);
       setFoodsState(foodsData ? JSON.parse(foodsData) : defaultFoods);
-      setMealsState(mealsData ? JSON.parse(mealsData) : defaultMeals);
+      setMealsState(loadedMeals);
+      // Plan: try to load, else generate default
+      if (planData) {
+        setPlanState(JSON.parse(planData));
+      } else {
+        setPlanState(getDefaultPlan(loadedWeekDays, loadedMeals));
+      }
       setIsInitialized(true);
     })();
   }, []);
+
+  // When weekDays or meals change, reset plan to match (if needed)
+  useEffect(() => {
+    setPlanState((prevPlan) => {
+      // If weekDays or meals changed, re-map plan to match new structure
+      const newPlan = weekDays.map((day) => {
+        const prevDay = prevPlan.find((p) => p.day === day);
+        const mealFields = Object.fromEntries(
+          meals.map((m) => [m, prevDay && m in prevDay ? prevDay[m] : ""])
+        );
+        return {
+          day,
+          ...mealFields,
+          notes: prevDay ? prevDay.notes : "",
+        };
+      });
+      AsyncStorage.setItem("plan", JSON.stringify(newPlan));
+      return newPlan;
+    });
+  }, [weekDays, meals]);
 
   return (
     <StoreContext.Provider
@@ -63,6 +115,8 @@ export const StoreProvider = ({ children }: { children: React.ReactNode }) => {
         meals,
         updateMeals,
         isInitialized,
+        plan,
+        updatePlan,
       }}
     >
       {children}

@@ -29,6 +29,7 @@ export default function FoodsScreen() {
     const trimmed = newFood.trim();
     if (trimmed && !foodsList.includes(trimmed)) {
       setFoodsList([...foodsList, trimmed]);
+      updateFoods([...foodsList, trimmed]); // Update context immediately
       setNewFood("");
     }
   };
@@ -36,6 +37,7 @@ export default function FoodsScreen() {
   // Remove food from local state
   const removeFood = (idx: number) => {
     setFoodsList(foodsList.filter((_, i) => i !== idx));
+    updateFoods(foodsList.filter((_, i) => i !== idx)); // Update context immediately
   };
 
   // Add refresh state
@@ -61,12 +63,14 @@ export default function FoodsScreen() {
   // Handler for drag-and-drop reorder
   const onDragEnd = ({ data }: { data: string[] }) => {
     setFoodsList(data);
+    updateFoods(data); // Update context immediately
   };
 
   // Save foods to context
-  const saveFoods = () => {
-    updateFoods(foodsList);
-  };
+  // const saveFoods = () => {
+  //   console.log("🚀 ~ saveFoods ~ foodsList:", foodsList)
+  //   updateFoods(foodsList);
+  // };
 
   // Wait for context to be initialized before rendering
   if (!isInitialized) {
@@ -110,6 +114,7 @@ export default function FoodsScreen() {
                   const arr = [...foodsList];
                   arr[index] = v;
                   setFoodsList(arr);
+                  updateFoods(arr); // Update context immediately
                 }}
                 placeholderTextColor={colorScheme === "dark" ? "#888" : "#aaa"}
               />
@@ -126,18 +131,19 @@ export default function FoodsScreen() {
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
-        contentContainerStyle={{ paddingBottom: 80 }}
+        contentContainerStyle={{ paddingBottom: 80 }} // Leave space for add row
       />
-      <View style={[
-        styles.addRow,
-        {
-          backgroundColor,
-          padding: 20,
-          paddingTop: 12,
-          borderTopWidth: 1,
-          borderTopColor: cardBorder,
-        },
-      ]}>
+      {/* Move the add food section outside the scrollable list and absolutely position it at the bottom */}
+      <View
+        style={[
+          styles.addRowFixed,
+          {
+            backgroundColor,
+            borderTopWidth: 1,
+            borderTopColor: cardBorder,
+          },
+        ]}
+      >
         <TextInput
           style={[
             styles.input,
@@ -158,18 +164,18 @@ export default function FoodsScreen() {
           <Text style={[styles.addBtnText, { color: '#fff' }]}>Add</Text>
         </TouchableOpacity>
       </View>
-      <TouchableOpacity
+      {/* <TouchableOpacity
         style={{ backgroundColor: '#007AFF', borderRadius: 8, paddingVertical: 14, marginTop: 18, marginBottom: 18 }}
         onPress={saveFoods}
       >
         <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 17, textAlign: 'center' }}>SAVE FOODS</Text>
-      </TouchableOpacity>
+      </TouchableOpacity> */}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20 },
+  container: { flex: 1, padding: 20, paddingBottom: 0 }, // Remove bottom padding, handled by addRowFixed
   title: {
     fontSize: 22,
     fontWeight: "bold",
@@ -203,7 +209,18 @@ const styles = StyleSheet.create({
     textAlign: "center",
     textAlignVertical: "center",
   },
-  addRow: { flexDirection: "row", alignItems: "center", marginTop: 12 },
+  addRow: { flexDirection: "row", alignItems: "center", marginTop: 12 }, // keep for reference, not used
+  addRowFixed: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 20,
+    paddingTop: 12,
+    position: "absolute",
+    left: 0,
+    right: 0,
+    bottom: 0,
+    // backgroundColor, borderTopWidth, borderTopColor set inline for theme
+  },
   input: {
     flex: 1,
     borderWidth: 1,

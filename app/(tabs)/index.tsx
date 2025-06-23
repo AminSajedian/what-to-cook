@@ -1,5 +1,5 @@
 import { useStore } from "@/contexts/StoreContext";
-import type { DayPlan } from "@/types/index"; // Import DayPlan
+// import type { DayPlan } from "@/types/index"; // Import DayPlan
 import React, { useState } from "react";
 import {
   FlatList,
@@ -19,42 +19,19 @@ type PlanField = "notes" | string; // Allow dynamic meal fields
 export default function HomeScreen() {
   const colorScheme = useColorScheme();
   const {
-    weekDays,
+    // weekDays,
     updateWeekDays,
     foods,
     updateFoods,
     meals,
     updateMeals,
     isInitialized,
+    plan,
+    updatePlan,
   } = useStore();
 
-  // Plan state, update when weekDays or meals changes
-  const [plan, setPlan] = useState<DayPlan[]>(
-    weekDays.map((day) => {
-      const mealFields = Object.fromEntries(meals.map((m) => [m, ""]));
-      return {
-        day,
-        ...mealFields,
-        notes: "",
-      };
-    })
-  );
-
-  // Update plan when weekDays or meals changes
-  React.useEffect(() => {
-    if (weekDays.length > 0 && meals.length > 0) {
-      setPlan(
-        weekDays.map((day) => {
-          const mealFields = Object.fromEntries(meals.map((m) => [m, ""]));
-          return {
-            day,
-            ...mealFields,
-            notes: "",
-          };
-        })
-      );
-    }
-  }, [weekDays, meals]);
+  // Use plan from context, fallback to empty array if not initialized
+  const planData = plan ?? [];
 
   // Modal state for food selection
   const [foodSelectorVisible, setFoodSelectorVisible] = useState(false);
@@ -80,17 +57,23 @@ export default function HomeScreen() {
       foodSelectorField &&
       foodSelectorField !== "notes"
     ) {
-      updatePlan(foodSelectorDayIdx, foodSelectorField, food);
+      // console.log("🚀 ~ selectFood ~ foodSelectorDayIdx:", foodSelectorDayIdx)
+      // console.log("🚀 ~ selectFood ~ foodSelectorField:", foodSelectorField)
+      // console.log("🚀 ~ selectFood ~ food:", food)
+      handleUpdatePlan(foodSelectorDayIdx, foodSelectorField, food);
     }
     setFoodSelectorVisible(false);
     setFoodSelectorDayIdx(null);
     setFoodSelectorField(null);
   };
 
-  const updatePlan = (index: number, field: PlanField, value: string) => {
-    const newPlan = [...plan];
-    newPlan[index][field] = value;
-    setPlan(newPlan);
+  // Update plan and persist to context
+  const handleUpdatePlan = (index: number, field: PlanField, value: string) => {
+    if (!planData || !updatePlan) return;
+    const newPlan = [...planData];
+    newPlan[index] = { ...newPlan[index], [field]: value };
+    // console.log("🚀 ~ handleUpdatePlan ~ newPlan:", newPlan)
+    updatePlan(newPlan);
   };
 
   // Add refresh state
@@ -102,14 +85,16 @@ export default function HomeScreen() {
     const AsyncStorage = (
       await import("@react-native-async-storage/async-storage")
     ).default;
-    const [days, foodsData, mealsData] = await Promise.all([
+    const [days, foodsData, mealsData, planDataRaw] = await Promise.all([
       AsyncStorage.getItem("weekDays"),
       AsyncStorage.getItem("foods"),
       AsyncStorage.getItem("meals"),
+      AsyncStorage.getItem("plan"),
     ]);
     if (days) updateWeekDays(JSON.parse(days));
     if (foodsData) updateFoods(JSON.parse(foodsData));
     if (mealsData) updateMeals(JSON.parse(mealsData));
+    if (planDataRaw && updatePlan) updatePlan(JSON.parse(planDataRaw));
     setRefreshing(false);
   };
 
@@ -143,7 +128,7 @@ export default function HomeScreen() {
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
       >
-        {plan.map((item, idx) => (
+        {planData.map((item, idx) => (
           <View
             key={item.day}
             style={[
@@ -183,7 +168,7 @@ export default function HomeScreen() {
                 { backgroundColor: inputBg, borderColor: inputBorder, color: textColor },
               ]}
               value={item.notes}
-              onChangeText={(v) => updatePlan(idx, "notes", v)}
+              onChangeText={(v) => handleUpdatePlan(idx, "notes", v)}
               placeholder="Add notes..."
               multiline
               placeholderTextColor={colorScheme === "dark" ? "#888" : "#aaa"}

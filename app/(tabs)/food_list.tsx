@@ -103,9 +103,17 @@ export default function FoodsScreen() {
         </Text>
         <DraggableFlatList
           data={foodsList}
-          keyExtractor={(item) => item}
+          keyExtractor={(item: string) => item}
           onDragEnd={onDragEnd}
-          renderItem={({ item, drag, isActive }) => {
+          renderItem={({
+            item,
+            drag,
+            isActive,
+          }: {
+            item: string;
+            drag: () => void;
+            isActive: boolean;
+          }) => {
             const index = foodsList.indexOf(item);
             return (
               <DraggableListItem

@@ -118,9 +118,17 @@ export default function SettingsScreen() {
           </Text>
           <DraggableFlatList
             data={days}
-            keyExtractor={(d) => d}
+            keyExtractor={(d: string) => d}
             onDragEnd={onDaysDragEnd}
-            renderItem={({ item, drag, isActive }) => {
+            renderItem={({
+              item,
+              drag,
+              isActive,
+            }: {
+              item: string;
+              drag: () => void;
+              isActive: boolean;
+            }) => {
               const index = days.indexOf(item);
               return (
                 <DraggableListItem
@@ -233,9 +241,17 @@ export default function SettingsScreen() {
           </Text>
           <DraggableFlatList
             data={mealsList}
-            keyExtractor={(item) => item}
+            keyExtractor={(item: string) => item}
             onDragEnd={onMealsDragEnd}
-            renderItem={({ item, drag, isActive }) => {
+            renderItem={({
+              item,
+              drag,
+              isActive,
+            }: {
+              item: string;
+              drag: () => void;
+              isActive: boolean;
+            }) => {
               const index = mealsList.indexOf(item);
               return (
                 <DraggableListItem

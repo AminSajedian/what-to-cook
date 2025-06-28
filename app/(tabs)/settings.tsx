@@ -1,7 +1,7 @@
 import { useStore } from "@/contexts/StoreContext";
 // import { MaterialIcons } from "@expo/vector-icons";
 import DraggableListItem from "@/components/DraggableListItem";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   KeyboardAvoidingView,
   Platform,
@@ -32,6 +32,35 @@ export default function SettingsScreen() {
   const [newDay, setNewDay] = useState("");
   const [mealsList, setMealsList] = useState<string[]>(meals);
   const [newMeal, setNewMeal] = useState("");
+
+  // Add debounce refs for saving
+  const saveDaysTimeoutRef = useRef<number | null>(null);
+  const saveMealsTimeoutRef = useRef<number | null>(null);
+
+  // Debounced save functions
+  const debouncedSaveDays = useCallback(
+    (data: string[]) => {
+      if (saveDaysTimeoutRef.current) {
+        clearTimeout(saveDaysTimeoutRef.current);
+      }
+      saveDaysTimeoutRef.current = setTimeout(() => {
+        updateWeekDays(data);
+      }, 500);
+    },
+    [updateWeekDays]
+  );
+
+  const debouncedSaveMeals = useCallback(
+    (data: string[]) => {
+      if (saveMealsTimeoutRef.current) {
+        clearTimeout(saveMealsTimeoutRef.current);
+      }
+      saveMealsTimeoutRef.current = setTimeout(() => {
+        updateMeals(data);
+      }, 500);
+    },
+    [updateMeals]
+  );
 
   // Sync local state with context when context changes
   useEffect(() => {
@@ -118,18 +147,20 @@ export default function SettingsScreen() {
           </Text>
           <DraggableFlatList
             data={days}
-            keyExtractor={(d: string) => d}
+            keyExtractor={(d: string, index: number) => `day-${index}`}
             onDragEnd={onDaysDragEnd}
             renderItem={({
               item,
               drag,
               isActive,
+              getIndex,
             }: {
               item: string;
               drag: () => void;
               isActive: boolean;
+              getIndex: () => number | undefined;
             }) => {
-              const index = days.indexOf(item);
+              const index = getIndex() ?? 0;
               return (
                 <DraggableListItem
                   value={item}
@@ -137,6 +168,14 @@ export default function SettingsScreen() {
                     const arr = [...days];
                     arr[index] = v;
                     setDays(arr);
+                    // Remove debounced save - only save on blur
+                  }}
+                  onBlur={() => {
+                    // Save immediately when user finishes editing
+                    if (saveDaysTimeoutRef.current) {
+                      clearTimeout(saveDaysTimeoutRef.current);
+                    }
+                    updateWeekDays(days);
                   }}
                   onRemove={() => removeDay(index)}
                   drag={drag}
@@ -241,18 +280,20 @@ export default function SettingsScreen() {
           </Text>
           <DraggableFlatList
             data={mealsList}
-            keyExtractor={(item: string) => item}
+            keyExtractor={(item: string, index: number) => `meal-${index}`}
             onDragEnd={onMealsDragEnd}
             renderItem={({
               item,
               drag,
               isActive,
+              getIndex,
             }: {
               item: string;
               drag: () => void;
               isActive: boolean;
+              getIndex: () => number | undefined;
             }) => {
-              const index = mealsList.indexOf(item);
+              const index = getIndex() ?? 0;
               return (
                 <DraggableListItem
                   value={item}
@@ -260,6 +301,14 @@ export default function SettingsScreen() {
                     const arr = [...mealsList];
                     arr[index] = v;
                     setMealsList(arr);
+                    // Remove debounced save - only save on blur
+                  }}
+                  onBlur={() => {
+                    // Save immediately when user finishes editing
+                    if (saveMealsTimeoutRef.current) {
+                      clearTimeout(saveMealsTimeoutRef.current);
+                    }
+                    updateMeals(mealsList);
                   }}
                   onRemove={() => removeMeal(index)}
                   drag={drag}

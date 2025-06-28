@@ -1,7 +1,7 @@
 import { useStore } from "@/contexts/StoreContext";
 // import { MaterialIcons } from "@expo/vector-icons"; // Add this import for trash icon
 import DraggableListItem from "@/components/DraggableListItem";
-import React, { useState } from "react";
+import React, { useCallback, useRef, useState } from "react";
 import {
   KeyboardAvoidingView,
   Platform,
@@ -23,6 +23,22 @@ export default function FoodsScreen() {
   // Local state for editing food items
   const [foodsList, setFoodsList] = useState<string[]>(foods);
 
+  // Add debounce ref for saving
+  const saveTimeoutRef = useRef<number | null>(null);
+
+  // Debounced save function
+  const debouncedSave = useCallback(
+    (data: string[]) => {
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current);
+      }
+      saveTimeoutRef.current = setTimeout(() => {
+        updateFoods(data);
+      }, 500); // Save after 500ms of no changes
+    },
+    [updateFoods]
+  );
+
   // Sync local state with context when context changes
   React.useEffect(() => {
     setFoodsList(foods);
@@ -40,8 +56,9 @@ export default function FoodsScreen() {
 
   // Remove food from local state
   const removeFood = (idx: number) => {
-    setFoodsList(foodsList.filter((_, i) => i !== idx));
-    updateFoods(foodsList.filter((_, i) => i !== idx)); // Update context immediately
+    const newList = foodsList.filter((_, i) => i !== idx);
+    setFoodsList(newList);
+    updateFoods(newList); // Immediate update for removal
   };
 
   // Add refresh state
@@ -67,7 +84,7 @@ export default function FoodsScreen() {
   // Handler for drag-and-drop reorder
   const onDragEnd = ({ data }: { data: string[] }) => {
     setFoodsList(data);
-    updateFoods(data); // Update context immediately
+    updateFoods(data); // Immediate update for reorder
   };
 
   // Save foods to context
@@ -103,18 +120,20 @@ export default function FoodsScreen() {
         </Text>
         <DraggableFlatList
           data={foodsList}
-          keyExtractor={(item: string) => item}
+          keyExtractor={(item: string, index: number) => `food-${index}`}
           onDragEnd={onDragEnd}
           renderItem={({
             item,
             drag,
             isActive,
+            getIndex,
           }: {
             item: string;
             drag: () => void;
             isActive: boolean;
+            getIndex: () => number | undefined;
           }) => {
-            const index = foodsList.indexOf(item);
+            const index = getIndex() ?? 0;
             return (
               <DraggableListItem
                 value={item}
@@ -122,7 +141,14 @@ export default function FoodsScreen() {
                   const arr = [...foodsList];
                   arr[index] = v;
                   setFoodsList(arr);
-                  updateFoods(arr); // Update context immediately
+                  // Remove debounced save - only save on blur
+                }}
+                onBlur={() => {
+                  // Save immediately when user finishes editing
+                  if (saveTimeoutRef.current) {
+                    clearTimeout(saveTimeoutRef.current);
+                  }
+                  updateFoods(foodsList);
                 }}
                 onRemove={() => removeFood(index)}
                 drag={drag}

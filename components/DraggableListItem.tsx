@@ -11,6 +11,7 @@ import {
 type Props = {
   value: string;
   onChangeText: (v: string) => void;
+  onBlur?: () => void; // Add onBlur prop
   onRemove: () => void;
   drag: () => void;
   isActive: boolean;
@@ -25,6 +26,7 @@ type Props = {
 export default function DraggableListItem({
   value,
   onChangeText,
+  onBlur, // Add onBlur prop
   onRemove,
   drag,
   isActive,
@@ -72,6 +74,7 @@ export default function DraggableListItem({
         ]}
         value={value}
         onChangeText={onChangeText}
+        onBlur={onBlur} // Add onBlur handler
         placeholder={inputPlaceholder}
         placeholderTextColor={colorScheme === "dark" ? "#888" : "#aaa"}
       />

@@ -210,7 +210,7 @@ export default function FoodsScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20 },
+  container: { flex: 1, padding: 15 },
   title: {
     fontSize: 22,
     fontWeight: "bold",

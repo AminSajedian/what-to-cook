@@ -112,7 +112,7 @@ export default function SettingsScreen() {
     <KeyboardAvoidingView
       style={{ flex: 1 }}
       behavior={Platform.OS === "ios" ? "padding" : "height"}
-      keyboardVerticalOffset={Platform.OS === "ios" ? 64 : 50}
+      keyboardVerticalOffset={Platform.OS === "ios" ? 64 : 100}
     >
       <ScrollView style={{ flex: 1 }}>
         <View style={[styles.container, { backgroundColor }]}>
@@ -225,26 +225,6 @@ export default function SettingsScreen() {
                     </Text>
                   </TouchableOpacity>
                 </View>
-                <TouchableOpacity
-                  style={{
-                    backgroundColor: "#007AFF",
-                    borderRadius: 8,
-                    paddingVertical: 14,
-                    marginBottom: 18,
-                  }}
-                  onPress={() => updateWeekDays(days)}
-                >
-                  <Text
-                    style={{
-                      color: "#fff",
-                      fontWeight: "bold",
-                      fontSize: 17,
-                      textAlign: "center",
-                    }}
-                  >
-                    SAVE DAYS
-                  </Text>
-                </TouchableOpacity>
               </>
             }
           />
@@ -330,27 +310,6 @@ export default function SettingsScreen() {
               <Text style={{ color: "#fff", fontWeight: "bold" }}>Add</Text>
             </TouchableOpacity>
           </View>
-          <TouchableOpacity
-            style={{
-              backgroundColor: "#007AFF",
-              borderRadius: 8,
-              paddingVertical: 14,
-              marginTop: 18,
-              marginBottom: 18,
-            }}
-            onPress={() => updateMeals(mealsList)}
-          >
-            <Text
-              style={{
-                color: "#fff",
-                fontWeight: "bold",
-                fontSize: 17,
-                textAlign: "center",
-              }}
-            >
-              SAVE MEALS
-            </Text>
-          </TouchableOpacity>
         </View>
       </ScrollView>
     </KeyboardAvoidingView>

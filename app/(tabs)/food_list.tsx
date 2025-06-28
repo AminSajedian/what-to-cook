@@ -92,7 +92,7 @@ export default function FoodsScreen() {
     <KeyboardAvoidingView
       style={{ flex: 1 }}
       behavior={Platform.OS === "ios" ? "padding" : "height"}
-      keyboardVerticalOffset={Platform.OS === "ios" ? 64 : 100}
+      keyboardVerticalOffset={Platform.OS === "ios" ? 64 : 50}
     >
       <View style={[styles.container, { backgroundColor }]}>
         {" "}

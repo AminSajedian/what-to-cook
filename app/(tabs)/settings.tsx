@@ -107,7 +107,7 @@ export default function SettingsScreen() {
     <KeyboardAvoidingView
       style={{ flex: 1 }}
       behavior={Platform.OS === "ios" ? "padding" : "height"}
-      keyboardVerticalOffset={Platform.OS === "ios" ? 64 : 100}
+      keyboardVerticalOffset={Platform.OS === "ios" ? 64 : 50}
     >
       <ScrollView style={{ flex: 1 }}>
         <View style={[styles.container, { backgroundColor }]}>

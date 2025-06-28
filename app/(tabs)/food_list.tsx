@@ -118,6 +118,43 @@ export default function FoodsScreen() {
         <Text style={[styles.title, { color: textColor, marginBottom: 8 }]}>
           Edit Foods
         </Text>
+        {/* Fixed add food section at the top */}
+        <View
+          style={[
+            styles.addRowFixed,
+            {
+              backgroundColor,
+              borderBottomWidth: 1,
+              borderBottomColor: cardBorder,
+            },
+          ]}
+        >
+          <TextInput
+            style={[
+              styles.input,
+              {
+                backgroundColor: inputBg,
+                borderColor: inputBorder,
+                color: textColor,
+              },
+            ]}
+            value={newFood}
+            onChangeText={setNewFood}
+            placeholder="Add new food"
+            placeholderTextColor={colorScheme === "dark" ? "#888" : "#aaa"}
+          />
+          <TouchableOpacity
+            onPress={addFood}
+            style={[
+              styles.addBtn,
+              {
+                backgroundColor: colorScheme === "dark" ? "#007AFF" : "#007AFF",
+              },
+            ]}
+          >
+            <Text style={[styles.addBtnText, { color: "#fff" }]}>Add</Text>
+          </TouchableOpacity>
+        </View>
         <DraggableFlatList
           data={foodsList}
           keyExtractor={(item: string, index: number) => `food-${index}`}
@@ -166,58 +203,14 @@ export default function FoodsScreen() {
           refreshControl={
             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
           }
-          contentContainerStyle={{ paddingBottom: 80 }} // Leave space for add row
         />
-        {/* Move the add food section outside the scrollable list and absolutely position it at the bottom */}
-        <View
-          style={[
-            styles.addRowFixed,
-            {
-              backgroundColor,
-              borderTopWidth: 1,
-              borderTopColor: cardBorder,
-            },
-          ]}
-        >
-          <TextInput
-            style={[
-              styles.input,
-              {
-                backgroundColor: inputBg,
-                borderColor: inputBorder,
-                color: textColor,
-              },
-            ]}
-            value={newFood}
-            onChangeText={setNewFood}
-            placeholder="Add new food"
-            placeholderTextColor={colorScheme === "dark" ? "#888" : "#aaa"}
-          />
-          <TouchableOpacity
-            onPress={addFood}
-            style={[
-              styles.addBtn,
-              {
-                backgroundColor: colorScheme === "dark" ? "#007AFF" : "#007AFF",
-              },
-            ]}
-          >
-            <Text style={[styles.addBtnText, { color: "#fff" }]}>Add</Text>
-          </TouchableOpacity>
-        </View>
-        {/* <TouchableOpacity
-          style={{ backgroundColor: '#007AFF', borderRadius: 8, paddingVertical: 14, marginTop: 18, marginBottom: 18 }}
-          onPress={saveFoods}
-        >
-          <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 17, textAlign: 'center' }}>SAVE FOODS</Text>
-        </TouchableOpacity> */}
       </View>
     </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20, paddingBottom: 0 }, // Remove bottom padding, handled by addRowFixed
+  container: { flex: 1, padding: 20 },
   title: {
     fontSize: 22,
     fontWeight: "bold",
@@ -255,13 +248,11 @@ const styles = StyleSheet.create({
   addRowFixed: {
     flexDirection: "row",
     alignItems: "center",
-    padding: 20,
-    paddingTop: 12,
-    position: "absolute",
-    left: 0,
-    right: 0,
-    bottom: 0,
-    // backgroundColor, borderTopWidth, borderTopColor set inline for theme
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    marginHorizontal: -20, // Extend to container edges
+    marginBottom: 12, // Add space between add section and list
+    // backgroundColor, borderBottomWidth, borderBottomColor set inline for theme
   },
   input: {
     flex: 1,

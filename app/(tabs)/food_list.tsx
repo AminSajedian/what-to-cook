@@ -1,5 +1,6 @@
 import { useStore } from "@/contexts/StoreContext";
-import { MaterialIcons } from "@expo/vector-icons"; // Add this import for trash icon
+// import { MaterialIcons } from "@expo/vector-icons"; // Add this import for trash icon
+import DraggableListItem from "@/components/DraggableListItem";
 import React, { useState } from "react";
 import {
   KeyboardAvoidingView,
@@ -107,59 +108,24 @@ export default function FoodsScreen() {
           renderItem={({ item, drag, isActive }) => {
             const index = foodsList.indexOf(item);
             return (
-              <View
-                style={[
-                  styles.foodRow,
-                  {
-                    backgroundColor: cardBg,
-                    borderColor: cardBorder,
-                    shadowColor: colorScheme === "dark" ? "#000" : "#000",
-                  },
-                  isActive && { opacity: 0.7 },
-                ]}
-              >
-                <TouchableOpacity
-                  onLongPress={drag}
-                  delayLongPress={150}
-                  style={{ marginRight: 10 }}
-                >
-                  <Text
-                    style={{
-                      fontSize: 20,
-                      color: colorScheme === "dark" ? "#aaa" : "#888",
-                    }}
-                  >
-                    ≡
-                  </Text>
-                </TouchableOpacity>
-                <TextInput
-                  style={[
-                    styles.foodItem,
-                    {
-                      color: textColor,
-                      backgroundColor: "transparent",
-                      borderColor: "transparent",
-                      fontSize: 17,
-                    },
-                  ]}
-                  value={item}
-                  onChangeText={(v) => {
-                    const arr = [...foodsList];
-                    arr[index] = v;
-                    setFoodsList(arr);
-                    updateFoods(arr); // Update context immediately
-                  }}
-                  placeholderTextColor={
-                    colorScheme === "dark" ? "#888" : "#aaa"
-                  }
-                />
-                <TouchableOpacity
-                  onPress={() => removeFood(index)}
-                  style={[styles.removeBtn, { backgroundColor: "#ff5252" }]}
-                >
-                  <MaterialIcons name="delete" size={22} color="#fff" />
-                </TouchableOpacity>
-              </View>
+              <DraggableListItem
+                value={item}
+                onChangeText={(v) => {
+                  const arr = [...foodsList];
+                  arr[index] = v;
+                  setFoodsList(arr);
+                  updateFoods(arr); // Update context immediately
+                }}
+                onRemove={() => removeFood(index)}
+                drag={drag}
+                isActive={isActive}
+                colorScheme={colorScheme}
+                textColor={textColor}
+                cardBg={cardBg}
+                cardBorder={cardBorder}
+                inputPlaceholder="Food name"
+                removeIconName="delete"
+              />
             );
           }}
           style={styles.list}

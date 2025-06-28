@@ -1,8 +1,10 @@
 import { useStore } from "@/contexts/StoreContext";
-import { MaterialIcons } from "@expo/vector-icons";
+// import { MaterialIcons } from "@expo/vector-icons";
+import DraggableListItem from "@/components/DraggableListItem";
 import React, { useEffect, useState } from "react";
 import {
   KeyboardAvoidingView,
+  Platform,
   RefreshControl,
   ScrollView,
   StyleSheet,
@@ -11,7 +13,6 @@ import {
   TouchableOpacity,
   View,
   useColorScheme,
-  Platform,
 } from "react-native";
 import DraggableFlatList from "react-native-draggable-flatlist";
 
@@ -122,75 +123,23 @@ export default function SettingsScreen() {
             renderItem={({ item, drag, isActive }) => {
               const index = days.indexOf(item);
               return (
-                <View
-                  style={[
-                    styles.row,
-                    {
-                      backgroundColor: cardBg,
-                      borderRadius: 10,
-                      marginBottom: 10,
-                      paddingHorizontal: 10,
-                      paddingVertical: 4,
-                      borderWidth: 1,
-                      borderColor: inputBorder,
-                      shadowColor: "#000",
-                      elevation: 1,
-                    },
-                  ]}
-                >
-                  <TouchableOpacity
-                    onLongPress={drag}
-                    delayLongPress={150}
-                    style={{ marginRight: 10 }}
-                  >
-                    <Text
-                      style={{
-                        fontSize: 20,
-                        color: colorScheme === "dark" ? "#aaa" : "#888",
-                      }}
-                    >
-                      ≡
-                    </Text>
-                  </TouchableOpacity>
-                  <TextInput
-                    style={[
-                      styles.input,
-                      {
-                        backgroundColor: "transparent",
-                        borderColor: "transparent",
-                        color: textColor,
-                        fontSize: 17,
-                      },
-                    ]}
-                    value={item}
-                    onChangeText={(v) => {
-                      const arr = [...days];
-                      arr[index] = v;
-                      setDays(arr);
-                    }}
-                    placeholderTextColor={
-                      colorScheme === "dark" ? "#888" : "#aaa"
-                    }
-                  />
-                  <TouchableOpacity
-                    onPress={() => removeDay(index)}
-                    style={{
-                      marginLeft: 8,
-                      justifyContent: "center",
-                      alignItems: "center",
-                    }}
-                  >
-                    <Text
-                      style={{
-                        fontSize: 22,
-                        color: "#ff5252",
-                        fontWeight: "bold",
-                      }}
-                    >
-                      ✕
-                    </Text>
-                  </TouchableOpacity>
-                </View>
+                <DraggableListItem
+                  value={item}
+                  onChangeText={(v) => {
+                    const arr = [...days];
+                    arr[index] = v;
+                    setDays(arr);
+                  }}
+                  onRemove={() => removeDay(index)}
+                  drag={drag}
+                  isActive={isActive}
+                  colorScheme={colorScheme}
+                  textColor={textColor}
+                  cardBg={cardBg}
+                  cardBorder={inputBorder}
+                  inputPlaceholder="Day name"
+                  removeIconName="delete"
+                />
               );
             }}
             refreshControl={
@@ -289,54 +238,23 @@ export default function SettingsScreen() {
             renderItem={({ item, drag, isActive }) => {
               const index = mealsList.indexOf(item);
               return (
-                <View
-                  style={{
-                    flexDirection: "row",
-                    alignItems: "center",
-                    backgroundColor: cardBg,
-                    borderRadius: 10,
-                    paddingVertical: 10,
-                    paddingHorizontal: 16,
-                    marginBottom: 8,
-                    borderWidth: 1,
-                    borderColor: inputBorder,
-                    opacity: isActive ? 0.7 : 1,
+                <DraggableListItem
+                  value={item}
+                  onChangeText={(v) => {
+                    const arr = [...mealsList];
+                    arr[index] = v;
+                    setMealsList(arr);
                   }}
-                >
-                  <TouchableOpacity
-                    onLongPress={drag}
-                    delayLongPress={150}
-                    style={{ marginRight: 10 }}
-                  >
-                    <Text style={{ fontSize: 20, color: "#888" }}>≡</Text>
-                  </TouchableOpacity>
-                  <TextInput
-                    style={[
-                      styles.input,
-                      {
-                        backgroundColor: "transparent",
-                        borderColor: "transparent",
-                        color: textColor,
-                        fontSize: 17,
-                      },
-                    ]}
-                    value={item}
-                    onChangeText={(v) => {
-                      const arr = [...mealsList];
-                      arr[index] = v;
-                      setMealsList(arr);
-                    }}
-                    placeholderTextColor={
-                      colorScheme === "dark" ? "#888" : "#aaa"
-                    }
-                  />
-                  <TouchableOpacity
-                    onPress={() => removeMeal(index)}
-                    style={{ marginLeft: 8 }}
-                  >
-                    <MaterialIcons name="delete" size={22} color="#ff5252" />
-                  </TouchableOpacity>
-                </View>
+                  onRemove={() => removeMeal(index)}
+                  drag={drag}
+                  isActive={isActive}
+                  colorScheme={colorScheme}
+                  textColor={textColor}
+                  cardBg={cardBg}
+                  cardBorder={inputBorder}
+                  inputPlaceholder="Meal name"
+                  removeIconName="delete"
+                />
               );
             }}
             scrollEnabled={false}

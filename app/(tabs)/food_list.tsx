@@ -1,7 +1,9 @@
 import { useStore } from "@/contexts/StoreContext";
-import { MaterialIcons } from '@expo/vector-icons'; // Add this import for trash icon
+import { MaterialIcons } from "@expo/vector-icons"; // Add this import for trash icon
 import React, { useState } from "react";
 import {
+  KeyboardAvoidingView,
+  Platform,
   RefreshControl,
   StyleSheet,
   Text,
@@ -14,7 +16,8 @@ import DraggableFlatList from "react-native-draggable-flatlist";
 
 export default function FoodsScreen() {
   const colorScheme = useColorScheme(); // Get current theme
-  const { foods, updateFoods, isInitialized, updateWeekDays, updateMeals } = useStore();
+  const { foods, updateFoods, isInitialized, updateWeekDays, updateMeals } =
+    useStore();
   const [newFood, setNewFood] = useState("");
   // Local state for editing food items
   const [foodsList, setFoodsList] = useState<string[]>(foods);
@@ -86,91 +89,130 @@ export default function FoodsScreen() {
   const inputBorder = colorScheme === "dark" ? "#333" : "#e0e0e0";
 
   return (
-    <View style={[styles.container, { backgroundColor }]}> {/* Theme background */}
-      <Text style={[styles.title, { color: textColor, marginBottom: 8 }]}>Edit Foods</Text>
-      <DraggableFlatList
-        data={foodsList}
-        keyExtractor={(item) => item}
-        onDragEnd={onDragEnd}
-        renderItem={({ item, drag, isActive }) => {
-          const index = foodsList.indexOf(item);
-          return (
-            <View style={[
-              styles.foodRow,
-              { backgroundColor: cardBg, borderColor: cardBorder, shadowColor: colorScheme === "dark" ? "#000" : "#000" },
-              isActive && { opacity: 0.7 },
-            ]}>
-              <TouchableOpacity
-                onLongPress={drag}
-                delayLongPress={150}
-                style={{ marginRight: 10 }}
+    <KeyboardAvoidingView
+      style={{ flex: 1 }}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      keyboardVerticalOffset={Platform.OS === "ios" ? 64 : 100}
+    >
+      <View style={[styles.container, { backgroundColor }]}>
+        {" "}
+        {/* Theme background */}
+        <Text style={[styles.title, { color: textColor, marginBottom: 8 }]}>
+          Edit Foods
+        </Text>
+        <DraggableFlatList
+          data={foodsList}
+          keyExtractor={(item) => item}
+          onDragEnd={onDragEnd}
+          renderItem={({ item, drag, isActive }) => {
+            const index = foodsList.indexOf(item);
+            return (
+              <View
+                style={[
+                  styles.foodRow,
+                  {
+                    backgroundColor: cardBg,
+                    borderColor: cardBorder,
+                    shadowColor: colorScheme === "dark" ? "#000" : "#000",
+                  },
+                  isActive && { opacity: 0.7 },
+                ]}
               >
-                <Text style={{ fontSize: 20, color: colorScheme === "dark" ? '#aaa' : '#888' }}>≡</Text>
-              </TouchableOpacity>
-              <TextInput
-                style={[styles.foodItem, { color: textColor, backgroundColor: 'transparent', borderColor: 'transparent', fontSize: 17 }]}
-                value={item}
-                onChangeText={(v) => {
-                  const arr = [...foodsList];
-                  arr[index] = v;
-                  setFoodsList(arr);
-                  updateFoods(arr); // Update context immediately
-                }}
-                placeholderTextColor={colorScheme === "dark" ? "#888" : "#aaa"}
-              />
-              <TouchableOpacity
-                onPress={() => removeFood(index)}
-                style={[styles.removeBtn, { backgroundColor: '#ff5252' }]}
-              >
-                <MaterialIcons name="delete" size={22} color="#fff" />
-              </TouchableOpacity>
-            </View>
-          );
-        }}
-        style={styles.list}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-        }
-        contentContainerStyle={{ paddingBottom: 80 }} // Leave space for add row
-      />
-      {/* Move the add food section outside the scrollable list and absolutely position it at the bottom */}
-      <View
-        style={[
-          styles.addRowFixed,
-          {
-            backgroundColor,
-            borderTopWidth: 1,
-            borderTopColor: cardBorder,
-          },
-        ]}
-      >
-        <TextInput
-          style={[
-            styles.input,
-            { backgroundColor: inputBg, borderColor: inputBorder, color: textColor },
-          ]}
-          value={newFood}
-          onChangeText={setNewFood}
-          placeholder="Add new food"
-          placeholderTextColor={colorScheme === "dark" ? "#888" : "#aaa"}
+                <TouchableOpacity
+                  onLongPress={drag}
+                  delayLongPress={150}
+                  style={{ marginRight: 10 }}
+                >
+                  <Text
+                    style={{
+                      fontSize: 20,
+                      color: colorScheme === "dark" ? "#aaa" : "#888",
+                    }}
+                  >
+                    ≡
+                  </Text>
+                </TouchableOpacity>
+                <TextInput
+                  style={[
+                    styles.foodItem,
+                    {
+                      color: textColor,
+                      backgroundColor: "transparent",
+                      borderColor: "transparent",
+                      fontSize: 17,
+                    },
+                  ]}
+                  value={item}
+                  onChangeText={(v) => {
+                    const arr = [...foodsList];
+                    arr[index] = v;
+                    setFoodsList(arr);
+                    updateFoods(arr); // Update context immediately
+                  }}
+                  placeholderTextColor={
+                    colorScheme === "dark" ? "#888" : "#aaa"
+                  }
+                />
+                <TouchableOpacity
+                  onPress={() => removeFood(index)}
+                  style={[styles.removeBtn, { backgroundColor: "#ff5252" }]}
+                >
+                  <MaterialIcons name="delete" size={22} color="#fff" />
+                </TouchableOpacity>
+              </View>
+            );
+          }}
+          style={styles.list}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          }
+          contentContainerStyle={{ paddingBottom: 80 }} // Leave space for add row
         />
-        <TouchableOpacity
-          onPress={addFood}
+        {/* Move the add food section outside the scrollable list and absolutely position it at the bottom */}
+        <View
           style={[
-            styles.addBtn,
-            { backgroundColor: colorScheme === 'dark' ? '#007AFF' : '#007AFF' },
+            styles.addRowFixed,
+            {
+              backgroundColor,
+              borderTopWidth: 1,
+              borderTopColor: cardBorder,
+            },
           ]}
         >
-          <Text style={[styles.addBtnText, { color: '#fff' }]}>Add</Text>
-        </TouchableOpacity>
+          <TextInput
+            style={[
+              styles.input,
+              {
+                backgroundColor: inputBg,
+                borderColor: inputBorder,
+                color: textColor,
+              },
+            ]}
+            value={newFood}
+            onChangeText={setNewFood}
+            placeholder="Add new food"
+            placeholderTextColor={colorScheme === "dark" ? "#888" : "#aaa"}
+          />
+          <TouchableOpacity
+            onPress={addFood}
+            style={[
+              styles.addBtn,
+              {
+                backgroundColor: colorScheme === "dark" ? "#007AFF" : "#007AFF",
+              },
+            ]}
+          >
+            <Text style={[styles.addBtnText, { color: "#fff" }]}>Add</Text>
+          </TouchableOpacity>
+        </View>
+        {/* <TouchableOpacity
+          style={{ backgroundColor: '#007AFF', borderRadius: 8, paddingVertical: 14, marginTop: 18, marginBottom: 18 }}
+          onPress={saveFoods}
+        >
+          <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 17, textAlign: 'center' }}>SAVE FOODS</Text>
+        </TouchableOpacity> */}
       </View>
-      {/* <TouchableOpacity
-        style={{ backgroundColor: '#007AFF', borderRadius: 8, paddingVertical: 14, marginTop: 18, marginBottom: 18 }}
-        onPress={saveFoods}
-      >
-        <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 17, textAlign: 'center' }}>SAVE FOODS</Text>
-      </TouchableOpacity> */}
-    </View>
+    </KeyboardAvoidingView>
   );
 }
 

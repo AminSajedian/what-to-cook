@@ -1,7 +1,8 @@
 import { useStore } from "@/contexts/StoreContext";
-import { MaterialIcons } from '@expo/vector-icons';
+import { MaterialIcons } from "@expo/vector-icons";
 import React, { useEffect, useState } from "react";
 import {
+  KeyboardAvoidingView,
   RefreshControl,
   ScrollView,
   StyleSheet,
@@ -10,6 +11,7 @@ import {
   TouchableOpacity,
   View,
   useColorScheme,
+  Platform,
 } from "react-native";
 import DraggableFlatList from "react-native-draggable-flatlist";
 
@@ -102,171 +104,298 @@ export default function SettingsScreen() {
     );
 
   return (
-    <ScrollView style={{ flex: 1 }}>
-      <View style={[styles.container, { backgroundColor }]}>
-        {/* Week Days Section */}
-        <Text style={[styles.title, { color: textColor, marginBottom: 8 }]}>Edit Week Days</Text>
-        <DraggableFlatList
-          data={days}
-          keyExtractor={(d) => d}
-          onDragEnd={onDaysDragEnd}
-          renderItem={({ item, drag, isActive }) => {
-            const index = days.indexOf(item);
-            return (
-              <View style={[
-                styles.row,
-                {
-                  backgroundColor: cardBg,
-                  borderRadius: 10,
-                  marginBottom: 10,
-                  paddingHorizontal: 10,
-                  paddingVertical: 4,
-                  borderWidth: 1,
-                  borderColor: inputBorder,
-                  shadowColor: "#000",
-                  elevation: 1,
-                }
-              ]}>
-                <TouchableOpacity
-                  onLongPress={drag}
-                  delayLongPress={150}
-                  style={{ marginRight: 10 }}
+    <KeyboardAvoidingView
+      style={{ flex: 1 }}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      keyboardVerticalOffset={Platform.OS === "ios" ? 64 : 100}
+    >
+      <ScrollView style={{ flex: 1 }}>
+        <View style={[styles.container, { backgroundColor }]}>
+          {/* Week Days Section */}
+          <Text style={[styles.title, { color: textColor, marginBottom: 8 }]}>
+            Edit Week Days
+          </Text>
+          <DraggableFlatList
+            data={days}
+            keyExtractor={(d) => d}
+            onDragEnd={onDaysDragEnd}
+            renderItem={({ item, drag, isActive }) => {
+              const index = days.indexOf(item);
+              return (
+                <View
+                  style={[
+                    styles.row,
+                    {
+                      backgroundColor: cardBg,
+                      borderRadius: 10,
+                      marginBottom: 10,
+                      paddingHorizontal: 10,
+                      paddingVertical: 4,
+                      borderWidth: 1,
+                      borderColor: inputBorder,
+                      shadowColor: "#000",
+                      elevation: 1,
+                    },
+                  ]}
                 >
-                  <Text style={{ fontSize: 20, color: colorScheme === 'dark' ? '#aaa' : '#888' }}>≡</Text>
-                </TouchableOpacity>
-                <TextInput
-                  style={[styles.input, { backgroundColor: 'transparent', borderColor: 'transparent', color: textColor, fontSize: 17 }]}
-                  value={item}
-                  onChangeText={(v) => {
-                    const arr = [...days];
-                    arr[index] = v;
-                    setDays(arr);
+                  <TouchableOpacity
+                    onLongPress={drag}
+                    delayLongPress={150}
+                    style={{ marginRight: 10 }}
+                  >
+                    <Text
+                      style={{
+                        fontSize: 20,
+                        color: colorScheme === "dark" ? "#aaa" : "#888",
+                      }}
+                    >
+                      ≡
+                    </Text>
+                  </TouchableOpacity>
+                  <TextInput
+                    style={[
+                      styles.input,
+                      {
+                        backgroundColor: "transparent",
+                        borderColor: "transparent",
+                        color: textColor,
+                        fontSize: 17,
+                      },
+                    ]}
+                    value={item}
+                    onChangeText={(v) => {
+                      const arr = [...days];
+                      arr[index] = v;
+                      setDays(arr);
+                    }}
+                    placeholderTextColor={
+                      colorScheme === "dark" ? "#888" : "#aaa"
+                    }
+                  />
+                  <TouchableOpacity
+                    onPress={() => removeDay(index)}
+                    style={{
+                      marginLeft: 8,
+                      justifyContent: "center",
+                      alignItems: "center",
+                    }}
+                  >
+                    <Text
+                      style={{
+                        fontSize: 22,
+                        color: "#ff5252",
+                        fontWeight: "bold",
+                      }}
+                    >
+                      ✕
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              );
+            }}
+            refreshControl={
+              <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+            }
+            ListFooterComponent={
+              <>
+                <View
+                  style={[
+                    styles.row,
+                    {
+                      backgroundColor: cardBg,
+                      borderRadius: 10,
+                      marginBottom: 16,
+                      paddingHorizontal: 10,
+                      paddingVertical: 4,
+                      borderWidth: 1,
+                      borderColor: inputBorder,
+                      shadowColor: "#000",
+                      elevation: 1,
+                    },
+                  ]}
+                >
+                  <TextInput
+                    style={[
+                      styles.input,
+                      {
+                        backgroundColor: "transparent",
+                        borderColor: "transparent",
+                        color: textColor,
+                        fontSize: 17,
+                      },
+                    ]}
+                    value={newDay}
+                    onChangeText={setNewDay}
+                    placeholder="Add new day"
+                    placeholderTextColor={
+                      colorScheme === "dark" ? "#888" : "#aaa"
+                    }
+                  />
+                  <TouchableOpacity
+                    onPress={addDay}
+                    style={{
+                      marginLeft: 8,
+                      backgroundColor: "#007AFF",
+                      borderRadius: 8,
+                      paddingHorizontal: 16,
+                      paddingVertical: 8,
+                      justifyContent: "center",
+                      alignItems: "center",
+                    }}
+                  >
+                    <Text
+                      style={{
+                        color: "#fff",
+                        fontWeight: "bold",
+                        fontSize: 16,
+                      }}
+                    >
+                      Add
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+                <TouchableOpacity
+                  style={{
+                    backgroundColor: "#007AFF",
+                    borderRadius: 8,
+                    paddingVertical: 14,
+                    marginBottom: 18,
                   }}
-                  placeholderTextColor={colorScheme === "dark" ? "#888" : "#aaa"}
-                />
-                <TouchableOpacity
-                  onPress={() => removeDay(index)}
-                  style={{ marginLeft: 8, justifyContent: 'center', alignItems: 'center' }}
+                  onPress={() => updateWeekDays(days)}
                 >
-                  <Text style={{ fontSize: 22, color: '#ff5252', fontWeight: 'bold' }}>✕</Text>
+                  <Text
+                    style={{
+                      color: "#fff",
+                      fontWeight: "bold",
+                      fontSize: 17,
+                      textAlign: "center",
+                    }}
+                  >
+                    SAVE DAYS
+                  </Text>
                 </TouchableOpacity>
-              </View>
-            );
-          }}
-          refreshControl={
-            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-          }
-          ListFooterComponent={
-            <>
-              <View style={[
-                styles.row,
-                {
-                  backgroundColor: cardBg,
-                  borderRadius: 10,
-                  marginBottom: 16,
-                  paddingHorizontal: 10,
-                  paddingVertical: 4,
-                  borderWidth: 1,
-                  borderColor: inputBorder,
-                  shadowColor: "#000",
-                  elevation: 1,
-                }
-              ]}>
-                <TextInput
-                  style={[styles.input, { backgroundColor: 'transparent', borderColor: 'transparent', color: textColor, fontSize: 17 }]}
-                  value={newDay}
-                  onChangeText={setNewDay}
-                  placeholder="Add new day"
-                  placeholderTextColor={colorScheme === "dark" ? "#888" : "#aaa"}
-                />
-                <TouchableOpacity
-                  onPress={addDay}
-                  style={{ marginLeft: 8, backgroundColor: '#007AFF', borderRadius: 8, paddingHorizontal: 16, paddingVertical: 8, justifyContent: 'center', alignItems: 'center' }}
-                >
-                  <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 16 }}>Add</Text>
-                </TouchableOpacity>
-              </View>
-              <TouchableOpacity
-                style={{ backgroundColor: '#007AFF', borderRadius: 8, paddingVertical: 14, marginBottom: 18 }}
-                onPress={() => updateWeekDays(days)}
-              >
-                <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 17, textAlign: 'center' }}>SAVE DAYS</Text>
-              </TouchableOpacity>
-            </>
-          }
-        />
+              </>
+            }
+          />
 
-        {/* Meals Section */}
-        <Text style={[styles.title, { color: textColor, marginBottom: 8 }]}>Edit Meals</Text>
-        <DraggableFlatList
-          data={mealsList}
-          keyExtractor={(item) => item}
-          onDragEnd={onMealsDragEnd}
-          renderItem={({ item, drag, isActive }) => {
-            const index = mealsList.indexOf(item);
-            return (
-              <View style={{
-                flexDirection: "row",
-                alignItems: "center",
-                backgroundColor: cardBg,
-                borderRadius: 10,
-                paddingVertical: 10,
-                paddingHorizontal: 16,
-                marginBottom: 8,
+          {/* Meals Section */}
+          <Text style={[styles.title, { color: textColor, marginBottom: 8 }]}>
+            Edit Meals
+          </Text>
+          <DraggableFlatList
+            data={mealsList}
+            keyExtractor={(item) => item}
+            onDragEnd={onMealsDragEnd}
+            renderItem={({ item, drag, isActive }) => {
+              const index = mealsList.indexOf(item);
+              return (
+                <View
+                  style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    backgroundColor: cardBg,
+                    borderRadius: 10,
+                    paddingVertical: 10,
+                    paddingHorizontal: 16,
+                    marginBottom: 8,
+                    borderWidth: 1,
+                    borderColor: inputBorder,
+                    opacity: isActive ? 0.7 : 1,
+                  }}
+                >
+                  <TouchableOpacity
+                    onLongPress={drag}
+                    delayLongPress={150}
+                    style={{ marginRight: 10 }}
+                  >
+                    <Text style={{ fontSize: 20, color: "#888" }}>≡</Text>
+                  </TouchableOpacity>
+                  <TextInput
+                    style={[
+                      styles.input,
+                      {
+                        backgroundColor: "transparent",
+                        borderColor: "transparent",
+                        color: textColor,
+                        fontSize: 17,
+                      },
+                    ]}
+                    value={item}
+                    onChangeText={(v) => {
+                      const arr = [...mealsList];
+                      arr[index] = v;
+                      setMealsList(arr);
+                    }}
+                    placeholderTextColor={
+                      colorScheme === "dark" ? "#888" : "#aaa"
+                    }
+                  />
+                  <TouchableOpacity
+                    onPress={() => removeMeal(index)}
+                    style={{ marginLeft: 8 }}
+                  >
+                    <MaterialIcons name="delete" size={22} color="#ff5252" />
+                  </TouchableOpacity>
+                </View>
+              );
+            }}
+            scrollEnabled={false}
+          />
+          <View
+            style={{ flexDirection: "row", alignItems: "center", marginTop: 8 }}
+          >
+            <TextInput
+              value={newMeal}
+              onChangeText={setNewMeal}
+              placeholder="Add meal (e.g. Snack)"
+              style={{
+                flex: 1,
                 borderWidth: 1,
                 borderColor: inputBorder,
-                opacity: isActive ? 0.7 : 1,
-              }}>
-                <TouchableOpacity onLongPress={drag} delayLongPress={150} style={{ marginRight: 10 }}>
-                  <Text style={{ fontSize: 20, color: "#888" }}>≡</Text>
-                </TouchableOpacity>
-                <TextInput
-                  style={[styles.input, { backgroundColor: 'transparent', borderColor: 'transparent', color: textColor, fontSize: 17 }]}
-                  value={item}
-                  onChangeText={(v) => {
-                    const arr = [...mealsList];
-                    arr[index] = v;
-                    setMealsList(arr);
-                  }}
-                  placeholderTextColor={colorScheme === "dark" ? "#888" : "#aaa"}
-                />
-                <TouchableOpacity onPress={() => removeMeal(index)} style={{ marginLeft: 8 }}>
-                  <MaterialIcons name="delete" size={22} color="#ff5252" />
-                </TouchableOpacity>
-              </View>
-            );
-          }}
-          scrollEnabled={false}
-        />
-        <View style={{ flexDirection: "row", alignItems: "center", marginTop: 8 }}>
-          <TextInput
-            value={newMeal}
-            onChangeText={setNewMeal}
-            placeholder="Add meal (e.g. Snack)"
+                borderRadius: 8,
+                padding: 8,
+                fontSize: 15,
+                color: textColor,
+                backgroundColor: cardBg,
+              }}
+              placeholderTextColor={colorScheme === "dark" ? "#888" : "#aaa"}
+            />
+            <TouchableOpacity
+              onPress={addMeal}
+              style={{
+                marginLeft: 8,
+                backgroundColor: "#007AFF",
+                borderRadius: 8,
+                padding: 10,
+              }}
+            >
+              <Text style={{ color: "#fff", fontWeight: "bold" }}>Add</Text>
+            </TouchableOpacity>
+          </View>
+          <TouchableOpacity
             style={{
-              flex: 1,
-              borderWidth: 1,
-              borderColor: inputBorder,
+              backgroundColor: "#007AFF",
               borderRadius: 8,
-              padding: 8,
-              fontSize: 15,
-              color: textColor,
-              backgroundColor: cardBg,
+              paddingVertical: 14,
+              marginTop: 18,
+              marginBottom: 18,
             }}
-            placeholderTextColor={colorScheme === "dark" ? "#888" : "#aaa"}
-          />
-          <TouchableOpacity onPress={addMeal} style={{ marginLeft: 8, backgroundColor: "#007AFF", borderRadius: 8, padding: 10 }}>
-            <Text style={{ color: "#fff", fontWeight: "bold" }}>Add</Text>
+            onPress={() => updateMeals(mealsList)}
+          >
+            <Text
+              style={{
+                color: "#fff",
+                fontWeight: "bold",
+                fontSize: 17,
+                textAlign: "center",
+              }}
+            >
+              SAVE MEALS
+            </Text>
           </TouchableOpacity>
         </View>
-        <TouchableOpacity
-          style={{ backgroundColor: '#007AFF', borderRadius: 8, paddingVertical: 14, marginTop: 18, marginBottom: 18 }}
-          onPress={() => updateMeals(mealsList)}
-        >
-          <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 17, textAlign: 'center' }}>SAVE MEALS</Text>
-        </TouchableOpacity>
-      </View>
-    </ScrollView>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 

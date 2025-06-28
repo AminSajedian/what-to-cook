@@ -1,7 +1,7 @@
 import { useStore } from "@/contexts/StoreContext";
 // import { MaterialIcons } from "@expo/vector-icons";
 import DraggableListItem from "@/components/DraggableListItem";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   KeyboardAvoidingView,
   Platform,
@@ -36,31 +36,6 @@ export default function SettingsScreen() {
   // Add debounce refs for saving
   const saveDaysTimeoutRef = useRef<number | null>(null);
   const saveMealsTimeoutRef = useRef<number | null>(null);
-
-  // Debounced save functions
-  const debouncedSaveDays = useCallback(
-    (data: string[]) => {
-      if (saveDaysTimeoutRef.current) {
-        clearTimeout(saveDaysTimeoutRef.current);
-      }
-      saveDaysTimeoutRef.current = setTimeout(() => {
-        updateWeekDays(data);
-      }, 500);
-    },
-    [updateWeekDays]
-  );
-
-  const debouncedSaveMeals = useCallback(
-    (data: string[]) => {
-      if (saveMealsTimeoutRef.current) {
-        clearTimeout(saveMealsTimeoutRef.current);
-      }
-      saveMealsTimeoutRef.current = setTimeout(() => {
-        updateMeals(data);
-      }, 500);
-    },
-    [updateMeals]
-  );
 
   // Sync local state with context when context changes
   useEffect(() => {

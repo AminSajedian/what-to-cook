@@ -1,7 +1,7 @@
 import { useStore } from "@/contexts/StoreContext";
 // import { MaterialIcons } from "@expo/vector-icons"; // Add this import for trash icon
 import DraggableListItem from "@/components/DraggableListItem";
-import React, { useCallback, useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 import {
   KeyboardAvoidingView,
   Platform,
@@ -25,19 +25,6 @@ export default function FoodsScreen() {
 
   // Add debounce ref for saving
   const saveTimeoutRef = useRef<number | null>(null);
-
-  // Debounced save function
-  const debouncedSave = useCallback(
-    (data: string[]) => {
-      if (saveTimeoutRef.current) {
-        clearTimeout(saveTimeoutRef.current);
-      }
-      saveTimeoutRef.current = setTimeout(() => {
-        updateFoods(data);
-      }, 500); // Save after 500ms of no changes
-    },
-    [updateFoods]
-  );
 
   // Sync local state with context when context changes
   React.useEffect(() => {

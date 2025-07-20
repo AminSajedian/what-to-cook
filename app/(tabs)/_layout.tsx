@@ -18,25 +18,37 @@ export default function Layout() {
         <Tabs
           screenOptions={{
             tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
-            headerShown: false,
             tabBarButton: HapticTab,
             tabBarBackground: TabBarBackground,
             tabBarStyle: Platform.select({
               ios: {
-                // Use a transparent background on iOS to show the blur effect
                 position: 'absolute',
               },
               default: {},
             }),
+            headerShown: true,
+            headerStyle: {
+              backgroundColor: Colors[colorScheme ?? 'light'].background,
+              borderBottomWidth: 0,
+              elevation: 0,
+              shadowOpacity: 0,
+              minHeight: 60, // Only supported properties
+            },
+            headerTitleStyle: {
+              fontWeight: 'bold',
+              fontSize: 22,
+              letterSpacing: 0.2,
+              color: Colors[colorScheme ?? 'light'].text,
+            },
+            headerTitleAlign: 'center',
           }}
         >
-          {/* Updated icon names to match MaterialIcons */}
           <Tabs.Screen
             name="index"
             options={{
               title: 'Week Plan',
               tabBarIcon: ({ color }) => (
-                <MaterialIcons size={28} name="home" color={color} /> // 'house.fill' -> 'home'
+                <MaterialIcons size={28} name="home" color={color} />
               ),
             }}
           />
@@ -45,7 +57,7 @@ export default function Layout() {
             options={{
               title: 'Food List',
               tabBarIcon: ({ color }) => (
-                <MaterialIcons size={28} name="restaurant" color={color} /> // 'paperplane.fill' -> 'restaurant'
+                <MaterialIcons size={28} name="restaurant" color={color} />
               ),
             }}
           />
@@ -54,7 +66,7 @@ export default function Layout() {
             options={{
               title: 'Settings',
               tabBarIcon: ({ color }) => (
-                <MaterialIcons size={28} name="settings" color={color} /> // 'gearshape.fill' -> 'settings'
+                <MaterialIcons size={28} name="settings" color={color} />
               ),
             }}
           />

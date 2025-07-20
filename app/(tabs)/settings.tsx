@@ -6,7 +6,6 @@ import {
   KeyboardAvoidingView,
   Platform,
   RefreshControl,
-  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -114,204 +113,203 @@ export default function SettingsScreen() {
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       keyboardVerticalOffset={Platform.OS === "ios" ? 64 : 100}
     >
-      <ScrollView style={{ flex: 1 }}>
-        <View style={[styles.container, { backgroundColor }]}>
-          {/* Week Days Section */}
-          <Text style={[styles.title, { color: textColor, marginBottom: 8 }]}>
-            Edit Week Days
-          </Text>
-          <DraggableFlatList
-            data={days}
-            keyExtractor={(d: string, index: number) => `day-${index}`}
-            onDragEnd={onDaysDragEnd}
-            renderItem={({
-              item,
-              drag,
-              isActive,
-              getIndex,
-            }: {
-              item: string;
-              drag: () => void;
-              isActive: boolean;
-              getIndex: () => number | undefined;
-            }) => {
-              const index = getIndex() ?? 0;
-              return (
-                <DraggableListItem
-                  value={item}
-                  onChangeText={(v) => {
-                    const arr = [...days];
-                    arr[index] = v;
-                    setDays(arr);
-                    // Remove debounced save - only save on blur
-                  }}
-                  onBlur={() => {
-                    // Save immediately when user finishes editing
-                    if (saveDaysTimeoutRef.current) {
-                      clearTimeout(saveDaysTimeoutRef.current);
-                    }
-                    updateWeekDays(days);
-                  }}
-                  onRemove={() => removeDay(index)}
-                  drag={drag}
-                  isActive={isActive}
-                  colorScheme={colorScheme}
-                  textColor={textColor}
-                  cardBg={cardBg}
-                  cardBorder={inputBorder}
-                  inputPlaceholder="Day name"
-                  removeIconName="delete"
-                />
-              );
-            }}
-            refreshControl={
-              <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-            }
-            ListFooterComponent={
-              <>
-                <View
+      <View style={[styles.container, { backgroundColor }]}>
+        {/* Week Days Section */}
+        <Text style={[styles.title, { color: textColor, marginBottom: 8 }]}>
+          Edit Week Days
+        </Text>
+        <DraggableFlatList
+          data={days}
+          keyExtractor={(d: string, index: number) => `day-${index}`}
+          onDragEnd={onDaysDragEnd}
+          renderItem={({
+            item,
+            drag,
+            isActive,
+            getIndex,
+          }: {
+            item: string;
+            drag: () => void;
+            isActive: boolean;
+            getIndex: () => number | undefined;
+          }) => {
+            const index = getIndex() ?? 0;
+            return (
+              <DraggableListItem
+                value={item}
+                onChangeText={(v) => {
+                  const arr = [...days];
+                  arr[index] = v;
+                  setDays(arr);
+                }}
+                onBlur={() => {
+                  if (saveDaysTimeoutRef.current) {
+                    clearTimeout(saveDaysTimeoutRef.current);
+                  }
+                  updateWeekDays(days);
+                }}
+                onRemove={() => removeDay(index)}
+                drag={drag}
+                isActive={isActive}
+                colorScheme={colorScheme}
+                textColor={textColor}
+                cardBg={cardBg}
+                cardBorder={inputBorder}
+                inputPlaceholder="Day name"
+                removeIconName="delete"
+              />
+            );
+          }}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          }
+          ListFooterComponent={
+            <>
+              <View
+                style={[
+                  styles.row,
+                  {
+                    backgroundColor: cardBg,
+                    borderRadius: 10,
+                    marginBottom: 16,
+                    paddingHorizontal: 10,
+                    paddingVertical: 4,
+                    borderWidth: 1,
+                    borderColor: inputBorder,
+                    shadowColor: "#000",
+                    elevation: 1,
+                  },
+                ]}
+              >
+                <TextInput
                   style={[
-                    styles.row,
+                    styles.input,
                     {
-                      backgroundColor: cardBg,
-                      borderRadius: 10,
-                      marginBottom: 16,
-                      paddingHorizontal: 10,
-                      paddingVertical: 4,
-                      borderWidth: 1,
-                      borderColor: inputBorder,
-                      shadowColor: "#000",
-                      elevation: 1,
+                      backgroundColor: "transparent",
+                      borderColor: "transparent",
+                      color: textColor,
+                      fontSize: 17,
                     },
                   ]}
+                  value={newDay}
+                  onChangeText={setNewDay}
+                  placeholder="Add new day"
+                  placeholderTextColor={
+                    colorScheme === "dark" ? "#888" : "#aaa"
+                  }
+                />
+                <TouchableOpacity
+                  onPress={addDay}
+                  style={{
+                    marginLeft: 8,
+                    backgroundColor: "#007AFF",
+                    borderRadius: 8,
+                    paddingHorizontal: 16,
+                    paddingVertical: 8,
+                    justifyContent: "center",
+                    alignItems: "center",
+                  }}
                 >
-                  <TextInput
-                    style={[
-                      styles.input,
-                      {
-                        backgroundColor: "transparent",
-                        borderColor: "transparent",
-                        color: textColor,
-                        fontSize: 17,
-                      },
-                    ]}
-                    value={newDay}
-                    onChangeText={setNewDay}
-                    placeholder="Add new day"
-                    placeholderTextColor={
-                      colorScheme === "dark" ? "#888" : "#aaa"
-                    }
-                  />
-                  <TouchableOpacity
-                    onPress={addDay}
+                  <Text
                     style={{
-                      marginLeft: 8,
-                      backgroundColor: "#007AFF",
-                      borderRadius: 8,
-                      paddingHorizontal: 16,
-                      paddingVertical: 8,
-                      justifyContent: "center",
-                      alignItems: "center",
+                      color: "#fff",
+                      fontWeight: "bold",
+                      fontSize: 16,
                     }}
                   >
-                    <Text
+                    Add
+                  </Text>
+                </TouchableOpacity>
+              </View>
+              {/* Meals Section */}
+              <Text style={[styles.title, { color: textColor, marginBottom: 8 }]}>
+                Edit Meals
+              </Text>
+              <DraggableFlatList
+                data={mealsList}
+                keyExtractor={(item: string, index: number) => `meal-${index}`}
+                onDragEnd={onMealsDragEnd}
+                renderItem={({
+                  item,
+                  drag,
+                  isActive,
+                  getIndex,
+                }: {
+                  item: string;
+                  drag: () => void;
+                  isActive: boolean;
+                  getIndex: () => number | undefined;
+                }) => {
+                  const index = getIndex() ?? 0;
+                  return (
+                    <DraggableListItem
+                      value={item}
+                      onChangeText={(v) => {
+                        const arr = [...mealsList];
+                        arr[index] = v;
+                        setMealsList(arr);
+                      }}
+                      onBlur={() => {
+                        if (saveMealsTimeoutRef.current) {
+                          clearTimeout(saveMealsTimeoutRef.current);
+                        }
+                        updateMeals(mealsList);
+                      }}
+                      onRemove={() => removeMeal(index)}
+                      drag={drag}
+                      isActive={isActive}
+                      colorScheme={colorScheme}
+                      textColor={textColor}
+                      cardBg={cardBg}
+                      cardBorder={inputBorder}
+                      inputPlaceholder="Meal name"
+                      removeIconName="delete"
+                    />
+                  );
+                }}
+                scrollEnabled={false}
+                ListFooterComponent={
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      alignItems: "center",
+                      marginTop: 8,
+                    }}
+                  >
+                    <TextInput
+                      value={newMeal}
+                      onChangeText={setNewMeal}
+                      placeholder="Add meal (e.g. Snack)"
                       style={{
-                        color: "#fff",
-                        fontWeight: "bold",
-                        fontSize: 16,
+                        flex: 1,
+                        borderWidth: 1,
+                        borderColor: inputBorder,
+                        borderRadius: 8,
+                        padding: 8,
+                        fontSize: 15,
+                        color: textColor,
+                        backgroundColor: cardBg,
+                      }}
+                      placeholderTextColor={colorScheme === "dark" ? "#888" : "#aaa"}
+                    />
+                    <TouchableOpacity
+                      onPress={addMeal}
+                      style={{
+                        marginLeft: 8,
+                        backgroundColor: "#007AFF",
+                        borderRadius: 8,
+                        padding: 10,
                       }}
                     >
-                      Add
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-              </>
-            }
-          />
-
-          {/* Meals Section */}
-          <Text style={[styles.title, { color: textColor, marginBottom: 8 }]}>
-            Edit Meals
-          </Text>
-          <DraggableFlatList
-            data={mealsList}
-            keyExtractor={(item: string, index: number) => `meal-${index}`}
-            onDragEnd={onMealsDragEnd}
-            renderItem={({
-              item,
-              drag,
-              isActive,
-              getIndex,
-            }: {
-              item: string;
-              drag: () => void;
-              isActive: boolean;
-              getIndex: () => number | undefined;
-            }) => {
-              const index = getIndex() ?? 0;
-              return (
-                <DraggableListItem
-                  value={item}
-                  onChangeText={(v) => {
-                    const arr = [...mealsList];
-                    arr[index] = v;
-                    setMealsList(arr);
-                    // Remove debounced save - only save on blur
-                  }}
-                  onBlur={() => {
-                    // Save immediately when user finishes editing
-                    if (saveMealsTimeoutRef.current) {
-                      clearTimeout(saveMealsTimeoutRef.current);
-                    }
-                    updateMeals(mealsList);
-                  }}
-                  onRemove={() => removeMeal(index)}
-                  drag={drag}
-                  isActive={isActive}
-                  colorScheme={colorScheme}
-                  textColor={textColor}
-                  cardBg={cardBg}
-                  cardBorder={inputBorder}
-                  inputPlaceholder="Meal name"
-                  removeIconName="delete"
-                />
-              );
-            }}
-            scrollEnabled={false}
-          />
-          <View
-            style={{ flexDirection: "row", alignItems: "center", marginTop: 8 }}
-          >
-            <TextInput
-              value={newMeal}
-              onChangeText={setNewMeal}
-              placeholder="Add meal (e.g. Snack)"
-              style={{
-                flex: 1,
-                borderWidth: 1,
-                borderColor: inputBorder,
-                borderRadius: 8,
-                padding: 8,
-                fontSize: 15,
-                color: textColor,
-                backgroundColor: cardBg,
-              }}
-              placeholderTextColor={colorScheme === "dark" ? "#888" : "#aaa"}
-            />
-            <TouchableOpacity
-              onPress={addMeal}
-              style={{
-                marginLeft: 8,
-                backgroundColor: "#007AFF",
-                borderRadius: 8,
-                padding: 10,
-              }}
-            >
-              <Text style={{ color: "#fff", fontWeight: "bold" }}>Add</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </ScrollView>
+                      <Text style={{ color: "#fff", fontWeight: "bold" }}>Add</Text>
+                    </TouchableOpacity>
+                  </View>
+                }
+              />
+            </>
+          }
+        />
+      </View>
     </KeyboardAvoidingView>
   );
 }

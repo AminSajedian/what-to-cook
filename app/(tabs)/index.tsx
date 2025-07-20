@@ -2,9 +2,10 @@ import { useStore } from "@/contexts/StoreContext";
 // import type { DayPlan } from "@/types/index"; // Import DayPlan
 import React, { useState } from "react";
 import {
-  KeyboardAvoidingView, Platform,
   FlatList,
+  KeyboardAvoidingView,
   Modal,
+  Platform,
   RefreshControl,
   ScrollView,
   StyleSheet,
@@ -42,6 +43,9 @@ export default function HomeScreen() {
   const [foodSelectorField, setFoodSelectorField] = useState<PlanField | null>(
     null
   );
+
+  // Add search state for modal filtering
+  const [foodSearch, setFoodSearch] = useState(""); // <-- Add this line
 
   // Open modal for a specific field
   const openFoodSelector = (dayIdx: number, field: PlanField) => {
@@ -129,7 +133,6 @@ export default function HomeScreen() {
       keyboardVerticalOffset={Platform.OS === "ios" ? 64 : 50} // adjust offset if needed
     >
       <View style={[styles.container, { backgroundColor }]}>
-        {" "}
         {/* Theme background */}
         <ScrollView
           style={{ flex: 1 }}
@@ -225,16 +228,37 @@ export default function HomeScreen() {
               },
             ]}
           >
-            {" "}
             {/* Darker overlay in dark mode */}
             <View style={[styles.modalContent, { backgroundColor: cardBg }]}>
-              {" "}
               {/* Modal card uses theme */}
               <Text style={[styles.modalTitle, { color: textColor }]}>
                 Select Food
               </Text>
+              {/* Search field for filtering foods */}
+              <TextInput
+                style={{
+                  borderWidth: 1,
+                  borderColor: inputBorder,
+                  borderRadius: 8,
+                  padding: 10,
+                  marginBottom: 12,
+                  fontSize: 16,
+                  color: textColor,
+                  backgroundColor: inputBg,
+                }}
+                value={foodSearch}
+                onChangeText={setFoodSearch}
+                placeholder="Search food..."
+                placeholderTextColor={colorScheme === "dark" ? "#888" : "#aaa"}
+                autoFocus={true}
+              />
               <FlatList
-                data={foods.map((item) => String(item))}
+                data={foods
+                  .map((item) => String(item))
+                  .filter((item) =>
+                    item.toLowerCase().includes(foodSearch.trim().toLowerCase())
+                  )
+                }
                 keyExtractor={(item) => String(item)}
                 renderItem={({ item }) => (
                   <TouchableOpacity
@@ -257,6 +281,7 @@ export default function HomeScreen() {
                 ItemSeparatorComponent={() => (
                   <View style={styles.foodSelectorSeparator} />
                 )}
+                keyboardShouldPersistTaps="handled"
               />
               <TouchableOpacity
                 style={[

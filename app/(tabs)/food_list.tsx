@@ -100,7 +100,6 @@ export default function FoodsScreen() {
       keyboardVerticalOffset={Platform.OS === "ios" ? 64 : 130}
     >
       <View style={[styles.container, { backgroundColor }]}>
-        {" "}
         {/* Theme background */}
         <Text style={[styles.title, { color: textColor, marginBottom: 8 }]}>
           Edit Foods

@@ -242,30 +242,58 @@ export default function HomeScreen() {
                 Select Food
               </Text>
               {/* Search field for filtering foods */}
-              <TextInput
-                style={{
-                  borderWidth: 1,
-                  borderColor: inputBorder,
-                  borderRadius: 8,
-                  padding: 10,
-                  marginBottom: 12,
-                  fontSize: 16,
-                  color: textColor,
-                  backgroundColor: inputBg,
-                }}
-                value={foodSearch}
-                onChangeText={setFoodSearch}
-                placeholder="Search food..."
-                placeholderTextColor={colorScheme === "dark" ? "#888" : "#aaa"}
-                autoFocus={true}
-              />
+              <View
+                style={{ flexDirection: "row", alignItems: "center", marginBottom: 12 }}
+              >
+                <TextInput
+                  style={{
+                    flex: 1,
+                    borderWidth: 1,
+                    borderColor: colorScheme === "dark" ? "#3a3a3a" : "#c7e2fa",
+                    borderRadius: 16,
+                    paddingVertical: 12,
+                    paddingHorizontal: 16,
+                    fontSize: 16,
+                    color: textColor,
+                    backgroundColor: colorScheme === "dark" ? "#232f3e" : "#eaf6ff",
+                    shadowColor: colorScheme === "dark" ? "#000" : "#007AFF",
+                    shadowOffset: { width: 0, height: 2 },
+                    shadowOpacity: 0.08,
+                    shadowRadius: 6,
+                    elevation: 2,
+                  }}
+                  value={foodSearch}
+                  onChangeText={setFoodSearch}
+                  placeholder="Search food..."
+                  placeholderTextColor={colorScheme === "dark" ? "#7cc4fa" : "#7cc4fa"}
+                  autoFocus={true}
+                />
+                {foodSearch.length > 0 && (
+                  <TouchableOpacity
+                    onPress={() => setFoodSearch("")}
+                    style={{
+                      padding: 8,
+                      borderRadius: 20,
+                      justifyContent: "center",
+                      alignItems: "center",
+                      position: "absolute",
+                      right: 10,
+                      top: -1,
+                    }}
+                    accessibilityLabel="Clear search"
+                  >
+                    <Text style={{ fontSize: 23, color: colorScheme === "dark" ? "#7cc4fa" : "#007AFF", fontWeight: "bold" }}>×</Text>
+                  </TouchableOpacity>
+                )}
+              </View>
               <FlatList
                 data={foods
                   .map((item) => String(item))
                   .filter((item) =>
-                    item.toLowerCase().includes(foodSearch.trim().toLowerCase())
-                  )
-                }
+                    item
+                      .toLowerCase()
+                      .includes(foodSearch.trim().toLowerCase())
+                  )}
                 keyExtractor={(item) => String(item)}
                 renderItem={({ item }) => (
                   <TouchableOpacity

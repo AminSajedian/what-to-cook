@@ -1,6 +1,7 @@
 import { useStore } from "@/contexts/StoreContext";
 // import { MaterialIcons } from "@expo/vector-icons"; // Add this import for trash icon
 import DraggableListItem from "@/components/DraggableListItem";
+import { useBottomTabOverflow } from "@/components/ui/TabBarBackground";
 import React, { useRef, useState } from "react";
 import {
   KeyboardAvoidingView,
@@ -74,6 +75,9 @@ export default function FoodsScreen() {
     updateFoods(data); // Immediate update for reorder
   };
 
+  // Move hook call to top-level, before any conditional logic
+  const bottomTabOverflow = useBottomTabOverflow(); // Get tab bar height
+
   // Save foods to context
   // const saveFoods = () => {
   //   console.log("🚀 ~ saveFoods ~ foodsList:", foodsList)
@@ -101,9 +105,9 @@ export default function FoodsScreen() {
     >
       <View style={[styles.container, { backgroundColor }]}>
         {/* Theme background */}
-        <Text style={[styles.title, { color: textColor, marginBottom: 8 }]}>
+        {/* <Text style={[styles.title, { color: textColor, marginBottom: 8 }]}>
           Edit Foods
-        </Text>
+        </Text> */}
         {/* Fixed add food section at the top */}
         <View
           style={[
@@ -186,6 +190,9 @@ export default function FoodsScreen() {
             );
           }}
           style={styles.list}
+          contentContainerStyle={{
+            paddingBottom: 60 + bottomTabOverflow, // Add tab bar height to bottom padding
+          }}
           refreshControl={
             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
           }
@@ -196,7 +203,7 @@ export default function FoodsScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 15 },
+  container: { flex: 1, paddingHorizontal: 15 },
   title: {
     fontSize: 22,
     fontWeight: "bold",
@@ -230,7 +237,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
     textAlignVertical: "center",
   },
-  addRow: { flexDirection: "row", alignItems: "center", marginTop: 12 }, // keep for reference, not used
+  addRow: { flexDirection: "row", alignItems: "center" }, // keep for reference, not used
   addRowFixed: {
     flexDirection: "row",
     alignItems: "center",
@@ -238,6 +245,7 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     marginHorizontal: -20, // Extend to container edges
     marginBottom: 12, // Add space between add section and list
+    // marginTop: 12,
     // backgroundColor, borderBottomWidth, borderBottomColor set inline for theme
   },
   input: {

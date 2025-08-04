@@ -1,6 +1,7 @@
 import { useStore } from "@/contexts/StoreContext";
 // import { MaterialIcons } from "@expo/vector-icons";
 import DraggableListItem from "@/components/DraggableListItem";
+import { useBottomTabOverflow } from "@/components/ui/TabBarBackground";
 import React, { useEffect, useRef, useState } from "react";
 import {
   KeyboardAvoidingView,
@@ -99,6 +100,7 @@ export default function SettingsScreen() {
   const textColor = colorScheme === "dark" ? "#fafafa" : "#222";
   const inputBorder = colorScheme === "dark" ? "#333" : "#ccc";
   const cardBg = colorScheme === "dark" ? "#18181b" : "#fff";
+  const bottomTabBarHeight = useBottomTabOverflow(); // Get tab bar height
 
   if (!isInitialized)
     return (
@@ -163,6 +165,9 @@ export default function SettingsScreen() {
           refreshControl={
             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
           }
+          contentContainerStyle={{
+            paddingBottom: 30 + bottomTabBarHeight, // Add tab bar height to bottom padding
+          }}
           ListFooterComponent={
             <>
               <View
@@ -268,6 +273,9 @@ export default function SettingsScreen() {
                   );
                 }}
                 scrollEnabled={false}
+                contentContainerStyle={{
+                  paddingBottom: 16 + bottomTabBarHeight, // Add tab bar height to bottom padding
+                }}
                 ListFooterComponent={
                   <View
                     style={{

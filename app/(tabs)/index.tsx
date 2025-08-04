@@ -1,5 +1,6 @@
 import { useStore } from "@/contexts/StoreContext";
 // import type { DayPlan } from "@/types/index"; // Import DayPlan
+import { useBottomTabOverflow } from "@/components/ui/TabBarBackground";
 import React, { useState } from "react";
 import {
   FlatList,
@@ -114,6 +115,9 @@ export default function HomeScreen() {
   const selectedBg = colorScheme === "dark" ? "#232f3e" : "#e6f0fa";
   const selectedText = colorScheme === "dark" ? "#7cc4fa" : "#007AFF";
 
+  // Always call hooks at the top level
+  const bottomTabOverflow = useBottomTabOverflow();
+
   // Wait for context to be initialized before rendering
   if (!isInitialized) {
     // Inline fix: ensure only React elements are returned, not raw values
@@ -136,7 +140,10 @@ export default function HomeScreen() {
         {/* Theme background */}
         <ScrollView
           style={{ flex: 1 }}
-          contentContainerStyle={styles.contentContainer}
+          contentContainerStyle={{
+            ...styles.contentContainer,
+            paddingBottom: 10 + bottomTabOverflow, // Add tab bar height to bottom padding
+          }}
           refreshControl={
             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
           }

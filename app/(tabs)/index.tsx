@@ -2,7 +2,7 @@ import { useStore } from "@/contexts/StoreContext";
 // import type { DayPlan } from "@/types/index"; // Import DayPlan
 import { useBottomTabOverflow } from "@/components/ui/TabBarBackground";
 import { MaterialIcons } from "@expo/vector-icons";
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import {
   Animated,
   FlatList,
@@ -34,7 +34,10 @@ export default function HomeScreen() {
     plan,
     updatePlan,
   } = useStore();
-
+  
+  // Add animation state for FAB rotation
+  const resetAnim = useRef(new Animated.Value(0)).current;
+  
   // Add state and modal for clear confirmation
   const [confirmClear, setConfirmClear] = useState<{
     idx: number;
@@ -151,8 +154,6 @@ export default function HomeScreen() {
     );
   }
 
-  // Add animation state for FAB rotation
-  const resetAnim = React.useRef(new Animated.Value(0)).current;
   const handleAnimatedReset = () => {
     Animated.sequence([
       Animated.timing(resetAnim, {
@@ -499,23 +500,16 @@ export default function HomeScreen() {
           style={[
             styles.fabReset,
             {
-              backgroundColor: selectedText,
-              position: "absolute",
+              backgroundColor: colorScheme === 'dark' ? '#7cc4fa' : '#007AFF',
+              position: 'absolute',
               left: 18,
               bottom: 24 + bottomTabOverflow,
-              shadowColor: "#000",
+              shadowColor: colorScheme === 'dark' ? '#7cc4fa' : '#007AFF',
               shadowOffset: { width: 0, height: 2 },
               shadowOpacity: 0.18,
               shadowRadius: 8,
               elevation: 6,
-              transform: [
-                {
-                  rotate: resetAnim.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: ["0deg", "360deg"],
-                  }),
-                },
-              ],
+              transform: [{ rotate: resetAnim.interpolate({ inputRange: [0, 1], outputRange: ['0deg', '360deg'] }) }],
             },
           ]}
         >
@@ -523,7 +517,7 @@ export default function HomeScreen() {
             onPress={handleAnimatedReset}
             accessibilityLabel="Reset all selected foods"
           >
-            <MaterialIcons name="refresh" size={25} color="#fff" />
+            <MaterialIcons name="refresh" size={28} color={colorScheme === 'dark' ? '#222' : '#fff'} />
           </TouchableOpacity>
         </Animated.View>
       </View>
@@ -686,8 +680,8 @@ const styles = StyleSheet.create({
     letterSpacing: 0.2,
   },
   fabReset: {
-    width: 50,
-    height: 50,
+    width: 44,
+    height: 44,
     borderRadius: 28,
     justifyContent: "center",
     alignItems: "center",

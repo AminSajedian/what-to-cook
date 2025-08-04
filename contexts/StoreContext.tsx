@@ -53,7 +53,7 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
   };
   // Add updatePlan
   const updatePlan = (newPlan: DayPlan[]) => {
-    console.log("🚀 ~ updatePlan ~ newPlan:", newPlan)
+    // console.log("🚀 ~ updatePlan ~ newPlan:", newPlan)
     setPlanState(newPlan);
     AsyncStorage.setItem("plan", JSON.stringify(newPlan));
   };
@@ -69,7 +69,7 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
         AsyncStorage.getItem("meals"),
         AsyncStorage.getItem("plan"),
       ]);
-      console.log("🚀 ~ StoreContext ~ foodsData:", foodsData)
+      // console.log("🚀 ~ StoreContext ~ foodsData:", foodsData)
       const loadedWeekDays = weekDaysData ? JSON.parse(weekDaysData) : defaultWeekDays;
       const loadedMeals = mealsData ? JSON.parse(mealsData) : defaultMeals;
       setWeekDaysState(loadedWeekDays);

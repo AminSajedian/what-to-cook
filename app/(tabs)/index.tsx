@@ -1,8 +1,10 @@
 import { useStore } from "@/contexts/StoreContext";
 // import type { DayPlan } from "@/types/index"; // Import DayPlan
 import { useBottomTabOverflow } from "@/components/ui/TabBarBackground";
+import { MaterialIcons } from "@expo/vector-icons";
 import React, { useState } from "react";
 import {
+  Animated,
   FlatList,
   KeyboardAvoidingView,
   Modal,
@@ -88,6 +90,19 @@ export default function HomeScreen() {
     updatePlan(newPlan);
   };
 
+  // Reset all selected foods in the week plan
+  const handleResetPlanFoods = () => {
+    if (!planData || !updatePlan) return;
+    const resetPlan = planData.map((day) => {
+      const resetDay = { ...day };
+      meals.forEach((meal) => {
+        resetDay[meal] = "";
+      });
+      return resetDay;
+    });
+    updatePlan(resetPlan);
+  };
+
   // Add refresh state
   const [refreshing, setRefreshing] = useState(false);
 
@@ -135,6 +150,24 @@ export default function HomeScreen() {
       </View>
     );
   }
+
+  // Add animation state for FAB rotation
+  const resetAnim = React.useRef(new Animated.Value(0)).current;
+  const handleAnimatedReset = () => {
+    Animated.sequence([
+      Animated.timing(resetAnim, {
+        toValue: 1,
+        duration: 500,
+        useNativeDriver: true,
+      }),
+      Animated.timing(resetAnim, {
+        toValue: 0,
+        duration: 0,
+        useNativeDriver: true,
+      }),
+    ]).start();
+    handleResetPlanFoods();
+  };
 
   return (
     <KeyboardAvoidingView
@@ -460,6 +493,39 @@ export default function HomeScreen() {
             </View>
           </View>
         </Modal>
+
+        {/* Add FAB reset button at bottom left */}
+        <Animated.View
+          style={[
+            styles.fabReset,
+            {
+              backgroundColor: selectedText,
+              position: "absolute",
+              left: 18,
+              bottom: 24 + bottomTabOverflow,
+              shadowColor: "#000",
+              shadowOffset: { width: 0, height: 2 },
+              shadowOpacity: 0.18,
+              shadowRadius: 8,
+              elevation: 6,
+              transform: [
+                {
+                  rotate: resetAnim.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: ["0deg", "360deg"],
+                  }),
+                },
+              ],
+            },
+          ]}
+        >
+          <TouchableOpacity
+            onPress={handleAnimatedReset}
+            accessibilityLabel="Reset all selected foods"
+          >
+            <MaterialIcons name="refresh" size={25} color="#fff" />
+          </TouchableOpacity>
+        </Animated.View>
       </View>
     </KeyboardAvoidingView>
   );
@@ -611,5 +677,20 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     fontSize: 16,
     letterSpacing: 0.1,
+  },
+  headerTitle: {
+    fontWeight: "bold",
+    fontSize: 22,
+    color: "#222",
+    textAlign: "center",
+    letterSpacing: 0.2,
+  },
+  fabReset: {
+    width: 50,
+    height: 50,
+    borderRadius: 28,
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 10,
   },
 });

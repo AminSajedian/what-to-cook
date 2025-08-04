@@ -38,9 +38,10 @@ export default function SettingsScreen() {
   const saveMealsTimeoutRef = useRef<number | null>(null);
 
   // Sync local state with context when context changes
-  useEffect(() => {
-    setDays(weekDays);
-  }, [weekDays]);
+  // Remove useEffect syncing days from context
+  // useEffect(() => {
+  //   setDays(weekDays);
+  // }, [weekDays]);
   useEffect(() => {
     setMealsList(meals);
   }, [meals]);
@@ -69,15 +70,20 @@ export default function SettingsScreen() {
   const addDay = () => {
     const trimmed = newDay.trim();
     if (trimmed && !days.includes(trimmed)) {
-      setDays([...days, trimmed]);
+      const updatedDays = [...days, trimmed];
+      setDays(updatedDays);
+      updateWeekDays(updatedDays); // Persist immediately
       setNewDay("");
     }
   };
   const removeDay = (idx: number) => {
-    setDays(days.filter((_, i) => i !== idx));
+    const updatedDays = days.filter((_, i) => i !== idx);
+    setDays(updatedDays);
+    updateWeekDays(updatedDays); // Persist immediately
   };
   const onDaysDragEnd = ({ data }: { data: string[] }) => {
     setDays(data);
+    updateWeekDays(data); // Persist new order immediately
   };
 
   // Add/remove/reorder meals
@@ -117,9 +123,50 @@ export default function SettingsScreen() {
     >
       <View style={[styles.container, { backgroundColor }]}>
         {/* Week Days Section */}
-        <Text style={[styles.title, { color: textColor, marginBottom: 8 }]}>
-          Edit Week Days
-        </Text>
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "space-between",
+            marginBottom: 8,
+          }}
+        >
+          <Text style={[styles.title, { color: textColor }]}>Edit Week Days</Text>
+          <TouchableOpacity
+            onPress={() => {
+              const defaultDays = [
+                "Monday",
+                "Tuesday",
+                "Wednesday",
+                "Thursday",
+                "Friday",
+                "Saturday",
+                "Sunday",
+              ];
+              setDays(defaultDays);
+              updateWeekDays(defaultDays);
+            }}
+            style={{
+              marginLeft: 8,
+              backgroundColor:
+                colorScheme === "dark" ? "#ffd54f" : "#ff9800",
+              borderRadius: 8,
+              paddingHorizontal: 14,
+              paddingVertical: 6,
+            }}
+            accessibilityLabel="Reset week days to default"
+          >
+            <Text
+              style={{
+                color: colorScheme === "dark" ? "#222" : "#fff",
+                fontWeight: "bold",
+                fontSize: 15,
+              }}
+            >
+              Reset
+            </Text>
+          </TouchableOpacity>
+        </View>
         <DraggableFlatList
           data={days}
           keyExtractor={(d: string, index: number) => `day-${index}`}
@@ -274,7 +321,7 @@ export default function SettingsScreen() {
                 }}
                 scrollEnabled={false}
                 contentContainerStyle={{
-                  paddingBottom: 25 + bottomTabBarHeight, // Add tab bar height to bottom padding
+                  paddingBottom: 35 + bottomTabBarHeight, // Add tab bar height to bottom padding
                 }}
                 ListFooterComponent={
                   <View

@@ -33,6 +33,12 @@ export default function HomeScreen() {
     updatePlan,
   } = useStore();
 
+  // Add state and modal for clear confirmation
+  const [confirmClear, setConfirmClear] = useState<{
+    idx: number;
+    field: PlanField;
+  } | null>(null);
+
   // Use plan from context, fallback to empty array if not initialized
   const planData = plan ?? [];
 
@@ -169,33 +175,63 @@ export default function HomeScreen() {
               {meals.map((field) => (
                 <View style={styles.row} key={field}>
                   <Text style={[styles.label, { color: labelColor }]}>
-                    {field}:
+                    {" "}
+                    {field}:{" "}
                   </Text>
-                  <TouchableOpacity
-                    style={[
-                      styles.foodSelectorField,
-                      { backgroundColor: inputBg, borderColor: inputBorder },
-                      item[field] && {
-                        backgroundColor: selectedBg,
-                        borderColor: selectedText,
-                      },
-                    ]}
-                    onPress={() => openFoodSelector(idx, field)}
-                    activeOpacity={0.7}
+                  <View
+                    style={{
+                      flex: 1,
+                      flexDirection: "row",
+                      alignItems: "center",
+                    }}
                   >
-                    <Text
+                    <TouchableOpacity
                       style={[
-                        styles.foodSelectorText,
-                        { color: textColor },
+                        styles.foodSelectorField,
+                        { backgroundColor: inputBg, borderColor: inputBorder },
                         item[field] && {
-                          color: selectedText,
-                          fontWeight: "bold",
+                          backgroundColor: selectedBg,
+                          borderColor: selectedText,
                         },
                       ]}
+                      onPress={() => openFoodSelector(idx, field)}
+                      activeOpacity={0.7}
                     >
-                      {item[field] ? item[field] : `Select food`}
-                    </Text>
-                  </TouchableOpacity>
+                      <Text
+                        style={[
+                          styles.foodSelectorText,
+                          { color: textColor },
+                          item[field] && {
+                            color: selectedText,
+                            fontWeight: "bold",
+                          },
+                        ]}
+                      >
+                        {" "}
+                        {item[field] ? item[field] : `Select food`}{" "}
+                      </Text>
+                    </TouchableOpacity>
+                    {/* Add clear button next to selected food */}
+                    {item[field] && (
+                      <TouchableOpacity
+                        style={{ position: "absolute", right: 13 }}
+                        onPress={() => {
+                          setConfirmClear({ idx, field });
+                        }}
+                        accessibilityLabel={`Clear ${field}`}
+                      >
+                        <Text
+                          style={{
+                            fontSize: 20,
+                            color: "#d11a2a",
+                            fontWeight: "bold",
+                          }}
+                        >
+                          ×
+                        </Text>
+                      </TouchableOpacity>
+                    )}
+                  </View>
                 </View>
               ))}
               <TextInput
@@ -243,7 +279,11 @@ export default function HomeScreen() {
               </Text>
               {/* Search field for filtering foods */}
               <View
-                style={{ flexDirection: "row", alignItems: "center", marginBottom: 12 }}
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  marginBottom: 12,
+                }}
               >
                 <TextInput
                   style={{
@@ -255,7 +295,8 @@ export default function HomeScreen() {
                     paddingHorizontal: 16,
                     fontSize: 16,
                     color: textColor,
-                    backgroundColor: colorScheme === "dark" ? "#232f3e" : "#eaf6ff",
+                    backgroundColor:
+                      colorScheme === "dark" ? "#232f3e" : "#eaf6ff",
                     shadowColor: colorScheme === "dark" ? "#000" : "#007AFF",
                     shadowOffset: { width: 0, height: 2 },
                     shadowOpacity: 0.08,
@@ -265,7 +306,9 @@ export default function HomeScreen() {
                   value={foodSearch}
                   onChangeText={setFoodSearch}
                   placeholder="Search food..."
-                  placeholderTextColor={colorScheme === "dark" ? "#7cc4fa" : "#7cc4fa"}
+                  placeholderTextColor={
+                    colorScheme === "dark" ? "#7cc4fa" : "#7cc4fa"
+                  }
                   autoFocus={true}
                 />
                 {foodSearch.length > 0 && (
@@ -282,7 +325,15 @@ export default function HomeScreen() {
                     }}
                     accessibilityLabel="Clear search"
                   >
-                    <Text style={{ fontSize: 23, color: colorScheme === "dark" ? "#7cc4fa" : "#007AFF", fontWeight: "bold" }}>×</Text>
+                    <Text
+                      style={{
+                        fontSize: 23,
+                        color: colorScheme === "dark" ? "#7cc4fa" : "#007AFF",
+                        fontWeight: "bold",
+                      }}
+                    >
+                      ×
+                    </Text>
                   </TouchableOpacity>
                 )}
               </View>
@@ -290,9 +341,7 @@ export default function HomeScreen() {
                 data={foods
                   .map((item) => String(item))
                   .filter((item) =>
-                    item
-                      .toLowerCase()
-                      .includes(foodSearch.trim().toLowerCase())
+                    item.toLowerCase().includes(foodSearch.trim().toLowerCase())
                   )}
                 keyExtractor={(item) => String(item)}
                 renderItem={({ item }) => (
@@ -333,6 +382,81 @@ export default function HomeScreen() {
                   Cancel
                 </Text>
               </TouchableOpacity>
+            </View>
+          </View>
+        </Modal>
+        {/* Confirmation modal for clearing food */}
+        <Modal
+          visible={!!confirmClear}
+          animationType="fade"
+          transparent={true}
+          onRequestClose={() => setConfirmClear(null)}
+        >
+          <View
+            style={[
+              styles.modalOverlay,
+              {
+                backgroundColor:
+                  colorScheme === "dark"
+                    ? "rgba(0,0,0,0.7)"
+                    : "rgba(0,0,0,0.18)",
+              },
+            ]}
+          >
+            <View
+              style={[
+                styles.modalContent,
+                { backgroundColor: cardBg, alignItems: "center" },
+              ]}
+            >
+              <Text
+                style={{
+                  color: textColor,
+                  fontSize: 17,
+                  fontWeight: "bold",
+                  marginBottom: 12,
+                }}
+              >
+                Remove selected food?
+              </Text>
+              <Text
+                style={{ color: labelColor, fontSize: 15, marginBottom: 18 }}
+              >
+                Are you sure you want to clear this meal?
+              </Text>
+              <View style={{ flexDirection: "row", gap: 16 }}>
+                <TouchableOpacity
+                  style={[
+                    styles.modalCancel,
+                    { backgroundColor: "#f2f2f7", borderColor: cardBorder },
+                  ]}
+                  onPress={() => setConfirmClear(null)}
+                >
+                  <Text style={[styles.modalCancelText, { color: "#444" }]}>
+                    Cancel
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[
+                    styles.modalCancel,
+                    { backgroundColor: "#d11a2a", borderColor: "#d11a2a" },
+                  ]}
+                  onPress={() => {
+                    if (confirmClear) {
+                      handleUpdatePlan(
+                        confirmClear.idx,
+                        confirmClear.field,
+                        ""
+                      );
+                      setConfirmClear(null);
+                    }
+                  }}
+                >
+                  <Text style={[styles.modalCancelText, { color: "#fff" }]}>
+                    Remove
+                  </Text>
+                </TouchableOpacity>
+              </View>
             </View>
           </View>
         </Modal>

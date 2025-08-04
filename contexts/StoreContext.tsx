@@ -43,7 +43,7 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
     AsyncStorage.setItem("weekDays", JSON.stringify(newDays));
   };
   const updateFoods = (newFoods: string[]) => {
-    console.log("🚀 ~ updateFoods ~ newFoods:", newFoods)
+    // console.log("🚀 ~ updateFoods ~ newFoods:", newFoods)
     setFoodsState(newFoods);
     AsyncStorage.setItem("foods", JSON.stringify(newFoods));
   };

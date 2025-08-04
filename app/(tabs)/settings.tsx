@@ -274,7 +274,7 @@ export default function SettingsScreen() {
                 }}
                 scrollEnabled={false}
                 contentContainerStyle={{
-                  paddingBottom: 16 + bottomTabBarHeight, // Add tab bar height to bottom padding
+                  paddingBottom: 25 + bottomTabBarHeight, // Add tab bar height to bottom padding
                 }}
                 ListFooterComponent={
                   <View
@@ -323,7 +323,7 @@ export default function SettingsScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 16 },
+  container: { flex: 1, paddingHorizontal: 16 },
   title: { fontWeight: "bold", fontSize: 18, marginVertical: 12 },
   row: { flexDirection: "row", alignItems: "center", marginBottom: 8 },
   input: {

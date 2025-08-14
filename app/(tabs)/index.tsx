@@ -59,6 +59,12 @@ export default function HomeScreen() {
   // Add search state for modal filtering
   const [foodSearch, setFoodSearch] = useState(""); // <-- Add this line
 
+  // Handle closing the food selector modal
+  const handleCloseFoodSelector = () => {
+    setFoodSelectorVisible(false);
+    setFoodSearch(""); // Clear search when closing
+  };
+
   // Open modal for a specific field
   const openFoodSelector = (dayIdx: number, field: PlanField) => {
     if (field === "notes") return;
@@ -79,7 +85,7 @@ export default function HomeScreen() {
       // console.log("🚀 ~ selectFood ~ food:", food)
       handleUpdatePlan(foodSelectorDayIdx, foodSelectorField, food);
     }
-    setFoodSelectorVisible(false);
+    handleCloseFoodSelector();
     setFoodSelectorDayIdx(null);
     setFoodSelectorField(null);
   };
@@ -287,12 +293,13 @@ export default function HomeScreen() {
             </View>
           ))}
         </ScrollView>
+        
         {/* Modal for food selection */}
         <Modal
           visible={foodSelectorVisible}
           animationType="slide"
           transparent={true}
-          onRequestClose={() => setFoodSelectorVisible(false)}
+          onRequestClose={handleCloseFoodSelector}
         >
           <View
             style={[
@@ -410,7 +417,7 @@ export default function HomeScreen() {
                     borderColor: cardBorder,
                   },
                 ]}
-                onPress={() => setFoodSelectorVisible(false)}
+                onPress={handleCloseFoodSelector}
               >
                 <Text style={[styles.modalCancelText, { color: selectedText }]}>
                   Cancel
@@ -419,6 +426,7 @@ export default function HomeScreen() {
             </View>
           </View>
         </Modal>
+
         {/* Confirmation modal for clearing food */}
         <Modal
           visible={!!confirmClear}

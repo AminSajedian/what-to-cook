@@ -1,5 +1,6 @@
 import { useStore } from "@/contexts/StoreContext";
 // import type { DayPlan } from "@/types/index"; // Import DayPlan
+import ConfirmModal from '@/components/ConfirmModal';
 import { useBottomTabOverflow } from "@/components/ui/TabBarBackground";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useNavigation } from '@react-navigation/native';
@@ -147,11 +148,12 @@ export default function HomeScreen() {
 
   // Put reset button in the header (left side)
   const navigation = useNavigation();
+  const [resetModalVisible, setResetModalVisible] = useState(false);
   useLayoutEffect(() => {
     navigation.setOptions({
       headerLeft: () => (
         <TouchableOpacity
-          onPress={handleResetPlanFoods}
+          onPress={() => setResetModalVisible(true)}
           style={{ marginLeft: 12, padding: 6 }}
           accessibilityLabel="Reset all selected foods"
         >
@@ -503,6 +505,20 @@ export default function HomeScreen() {
             </View>
           </View>
         </Modal>
+
+        {/* Confirmation modal for resetting the entire week plan (reusable) */}
+        <ConfirmModal
+          visible={resetModalVisible}
+          title="Reset week plan?"
+          message="This will clear all selected foods for the week. This action cannot be undone."
+          confirmText="Reset"
+          cancelText="Cancel"
+          onCancel={() => setResetModalVisible(false)}
+          onConfirm={() => {
+            handleResetPlanFoods();
+            setResetModalVisible(false);
+          }}
+        />
       </View>
     </KeyboardAvoidingView>
   );

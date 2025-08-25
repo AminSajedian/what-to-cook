@@ -2,9 +2,9 @@ import { useStore } from "@/contexts/StoreContext";
 // import type { DayPlan } from "@/types/index"; // Import DayPlan
 import { useBottomTabOverflow } from "@/components/ui/TabBarBackground";
 import { MaterialIcons } from "@expo/vector-icons";
-import React, { useRef, useState } from "react";
+import { useNavigation } from '@react-navigation/native';
+import React, { useCallback, useLayoutEffect, useState } from "react";
 import {
-  Animated,
   FlatList,
   KeyboardAvoidingView,
   Modal,
@@ -34,9 +34,6 @@ export default function HomeScreen() {
     plan,
     updatePlan,
   } = useStore();
-  
-  // Add animation state for FAB rotation
-  const resetAnim = useRef(new Animated.Value(0)).current;
   
   // Add state and modal for clear confirmation
   const [confirmClear, setConfirmClear] = useState<{
@@ -100,7 +97,7 @@ export default function HomeScreen() {
   };
 
   // Reset all selected foods in the week plan
-  const handleResetPlanFoods = () => {
+  const handleResetPlanFoods = useCallback(() => {
     if (!planData || !updatePlan) return;
     const resetPlan = planData.map((day) => {
       const resetDay = { ...day };
@@ -110,7 +107,7 @@ export default function HomeScreen() {
       return resetDay;
     });
     updatePlan(resetPlan);
-  };
+  }, [planData, updatePlan, meals]);
 
   // Add refresh state
   const [refreshing, setRefreshing] = useState(false);
@@ -148,6 +145,26 @@ export default function HomeScreen() {
   // Always call hooks at the top level
   const bottomTabOverflow = useBottomTabOverflow();
 
+  // Put reset button in the header (left side)
+  const navigation = useNavigation();
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerLeft: () => (
+        <TouchableOpacity
+          onPress={handleResetPlanFoods}
+          style={{ marginLeft: 12, padding: 6 }}
+          accessibilityLabel="Reset all selected foods"
+        >
+          <MaterialIcons
+            name="refresh"
+            size={22}
+            color={colorScheme === 'dark' ? '#7cc4fa' : '#007AFF'}
+          />
+        </TouchableOpacity>
+      ),
+    });
+  }, [navigation, colorScheme, handleResetPlanFoods]);
+
   // Wait for context to be initialized before rendering
   if (!isInitialized) {
     // Inline fix: ensure only React elements are returned, not raw values
@@ -159,22 +176,6 @@ export default function HomeScreen() {
       </View>
     );
   }
-
-  const handleAnimatedReset = () => {
-    Animated.sequence([
-      Animated.timing(resetAnim, {
-        toValue: 1,
-        duration: 500,
-        useNativeDriver: true,
-      }),
-      Animated.timing(resetAnim, {
-        toValue: 0,
-        duration: 0,
-        useNativeDriver: true,
-      }),
-    ]).start();
-    handleResetPlanFoods();
-  };
 
   return (
     <KeyboardAvoidingView
@@ -502,32 +503,6 @@ export default function HomeScreen() {
             </View>
           </View>
         </Modal>
-
-        {/* Add FAB reset button at bottom left */}
-        <Animated.View
-          style={[
-            styles.fabReset,
-            {
-              backgroundColor: colorScheme === 'dark' ? '#7cc4fa' : '#007AFF',
-              position: 'absolute',
-              left: 18,
-              bottom: 24 + bottomTabOverflow,
-              shadowColor: colorScheme === 'dark' ? '#7cc4fa' : '#007AFF',
-              shadowOffset: { width: 0, height: 2 },
-              shadowOpacity: 0.18,
-              shadowRadius: 8,
-              elevation: 6,
-              transform: [{ rotate: resetAnim.interpolate({ inputRange: [0, 1], outputRange: ['0deg', '360deg'] }) }],
-            },
-          ]}
-        >
-          <TouchableOpacity
-            onPress={handleAnimatedReset}
-            accessibilityLabel="Reset all selected foods"
-          >
-            <MaterialIcons name="refresh" size={28} color={colorScheme === 'dark' ? '#222' : '#fff'} />
-          </TouchableOpacity>
-        </Animated.View>
       </View>
     </KeyboardAvoidingView>
   );
@@ -686,13 +661,5 @@ const styles = StyleSheet.create({
     color: "#222",
     textAlign: "center",
     letterSpacing: 0.2,
-  },
-  fabReset: {
-    width: 44,
-    height: 44,
-    borderRadius: 28,
-    justifyContent: "center",
-    alignItems: "center",
-    zIndex: 10,
   },
 });

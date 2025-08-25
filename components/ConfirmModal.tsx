@@ -27,29 +27,35 @@ export default function ConfirmModal({
 }: Props) {
   const theme = useColorScheme() ?? 'light';
   const tint = Colors[theme].tint;
-  const destructive = '#d11a2a';
+  const destructive = theme === 'dark' ? '#d11a2a' : '#ff6b6b';
+
   return (
     <Modal visible={visible} animationType="fade" transparent onRequestClose={onCancel}>
-      <View style={styles.overlay}>
-        <ThemedView style={[styles.card, { shadowColor: tint }]}>
+      <View style={[styles.overlay, { backgroundColor: theme === 'dark' ? 'rgba(0,0,0,0.7)' : 'rgba(0,0,0,0.18)' }]}>
+        <ThemedView style={[styles.card, { shadowColor: tint }]}> 
           <View style={styles.headerRow}>
-            <MaterialIcons name="warning" size={24} color={tint} />
-            <ThemedText type="title" style={styles.title}>
-              {title}
-            </ThemedText>
+            <MaterialIcons name="warning" size={22} color={tint} />
+            <ThemedText type="title" style={styles.title}>{title}</ThemedText>
           </View>
 
           {message ? <ThemedText style={styles.message}>{message}</ThemedText> : null}
 
           <View style={styles.rowActions}>
-            <TouchableOpacity onPress={onCancel} style={[styles.button, styles.cancel]}>
-              <ThemedText style={styles.cancelText}>{cancelText}</ThemedText>
+            <TouchableOpacity
+              onPress={onCancel}
+              style={[
+                styles.button,
+                styles.cancel,
+                { borderColor: theme === 'dark' ? '#333' : '#e5e5ea' },
+              ]}
+            > 
+              <ThemedText style={[styles.cancelText, { color: Colors[theme].text }]}>{cancelText}</ThemedText>
             </TouchableOpacity>
             <TouchableOpacity
               onPress={onConfirm}
               style={[styles.button, styles.confirm, { backgroundColor: destructive }]}
-            >
-              <ThemedText style={styles.confirmText}>{confirmText}</ThemedText>
+            > 
+              <ThemedText style={[styles.confirmText, { color: '#fff' }]}>{confirmText}</ThemedText>
             </TouchableOpacity>
           </View>
         </ThemedView>
@@ -70,7 +76,7 @@ const styles = StyleSheet.create({
     width: '100%',
     maxWidth: 540,
     borderRadius: 14,
-    padding: 18,
+    padding: 25,
     alignItems: 'stretch',
     // subtle elevated card
     shadowOffset: { width: 0, height: 8 },
@@ -82,7 +88,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
-    marginBottom: 6,
+    marginBottom: 20,
   },
   title: {
     marginBottom: 0,
@@ -93,7 +99,6 @@ const styles = StyleSheet.create({
     marginBottom: 18,
     textAlign: 'left',
     fontSize: 15,
-    color: '#6b6b6b',
   },
   rowActions: {
     flexDirection: 'row',
@@ -116,11 +121,9 @@ const styles = StyleSheet.create({
     // color applied inline (destructive)
   },
   cancelText: {
-    color: '#fff',
     fontWeight: '600',
   },
   confirmText: {
-    color: '#fff',
     fontWeight: '700',
   },
 });

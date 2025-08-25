@@ -509,7 +509,7 @@ export default function HomeScreen() {
         {/* Confirmation modal for resetting the entire week plan (reusable) */}
         <ConfirmModal
           visible={resetModalVisible}
-          title="Reset week plan?"
+          title="Reset Week Plan?"
           message="This will clear all selected foods for the week. This action cannot be undone."
           confirmText="Reset"
           cancelText="Cancel"

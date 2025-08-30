@@ -1,3 +1,6 @@
+// Comment out the line below to disable warning suppression
+require("../warningSuppression");
+
 import {
   DarkTheme,
   DefaultTheme,

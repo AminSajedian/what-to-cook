@@ -6,7 +6,7 @@ import React, { useRef, useState } from "react";
 import {
   KeyboardAvoidingView,
   Platform,
-  RefreshControl,
+  // RefreshControl,
   StyleSheet,
   Text,
   TextInput,
@@ -193,9 +193,9 @@ export default function FoodsScreen() {
           contentContainerStyle={{
             paddingBottom: 60 + bottomTabOverflow, // Add tab bar height to bottom padding
           }}
-          refreshControl={
-            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-          }
+          // refreshControl={
+          //   <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          // }
         />
       </View>
     </KeyboardAvoidingView>

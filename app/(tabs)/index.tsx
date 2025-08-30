@@ -10,7 +10,7 @@ import {
   KeyboardAvoidingView,
   Modal,
   Platform,
-  RefreshControl,
+  // RefreshControl,
   ScrollView,
   StyleSheet,
   Text,
@@ -193,9 +193,9 @@ export default function HomeScreen() {
             ...styles.contentContainer,
             paddingBottom: 10 + bottomTabOverflow, // Add tab bar height to bottom padding
           }}
-          refreshControl={
-            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-          }
+          // refreshControl={
+          //   <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          // }
         >
           {planData.map((item, idx) => (
             <View

@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "WhatToCook",
-    "slug": "WhatToCook",
+    "name": "What To Cook",
+    "slug": "What To Cook",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",

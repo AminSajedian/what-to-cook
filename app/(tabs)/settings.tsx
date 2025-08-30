@@ -6,7 +6,7 @@ import React, { useEffect, useRef, useState } from "react";
 import {
   KeyboardAvoidingView,
   Platform,
-  RefreshControl,
+  // RefreshControl,
   StyleSheet,
   Text,
   TextInput,
@@ -209,9 +209,9 @@ export default function SettingsScreen() {
               />
             );
           }}
-          refreshControl={
-            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-          }
+          // refreshControl={
+          //   <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          // }
           contentContainerStyle={{
             paddingBottom: 30 + bottomTabBarHeight, // Add tab bar height to bottom padding
           }}
